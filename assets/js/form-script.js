@@ -886,7 +886,7 @@ function generateFullPreviewPage(data) {
             <h1>${data.h1Title || 'Título do Post'}</h1>
             <div class="meta">
                 <span class="meta-item">✍️ Por ${data.author || 'Autor'}</span>
-                <span class="meta-item">📅 ${data.datePublished || new Date().toLocaleDateString('pt-BR')}</span>
+                <span class="meta-item">📅 ${data.datePublishedFormatted || new Date().toLocaleDateString('pt-BR')}</span>
                 <span class="meta-item">⏱️ ${data.readTime || '5'} min de leitura</span>
             </div>
         </div>
@@ -897,9 +897,13 @@ function generateFullPreviewPage(data) {
         ` : ''}
         
         <div class="content">
-            ${data.content ? data.content.replace(/\n/g, '<br>') : '<p>Conteúdo do post será exibido aqui...</p>'}
+            ${data.introduction ? `<div class="introduction" style="font-size: 1.2rem; font-weight: 500; margin-bottom: 30px; padding-left: 20px; border-left: 4px solid #EB7A3D;">${data.introduction.replace(/\n/g, '<br>')}</div>` : ''}
+            
+            ${data.contentBody ? `<div class="main-content">${data.contentBody.replace(/\n/g, '<br>')}</div>` : '<p>Conteúdo do post será exibido aqui...</p>'}
             
             ${internalImagesHtml}
+            
+            ${data.conclusion ? `<div class="conclusion" style="margin-top: 40px; padding: 20px; background: rgba(255,255,255,0.03); border-radius: 12px;">${data.conclusion.replace(/\n/g, '<br>')}</div>` : ''}
         </div>
         
         ${data.secondaryKeywords ? `
@@ -907,6 +911,14 @@ function generateFullPreviewPage(data) {
                 ${data.secondaryKeywords.split(',').map(tag => 
                     `<span class="tag">#${tag.trim()}</span>`
                 ).join('')}
+            </div>
+        ` : ''}
+        
+        ${data.ctaTitle ? `
+            <div class="cta" style="margin-top: 40px; padding: 30px; background: linear-gradient(135deg, #EB7A3D, #d66a2e); border-radius: 16px; text-align: center;">
+                <h3 style="font-size: 1.8rem; margin-bottom: 15px;">${data.ctaTitle}</h3>
+                <p style="font-size: 1.1rem; margin-bottom: 20px; opacity: 0.95;">${data.ctaText || ''}</p>
+                ${data.ctaLink ? `<a href="${data.ctaLink}" style="display: inline-block; padding: 14px 32px; background: #fff; color: #EB7A3D; text-decoration: none; border-radius: 30px; font-weight: 700; font-size: 1rem; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">${data.ctaButtonText || 'Saiba Mais'}</a>` : ''}
             </div>
         ` : ''}
     </div>
