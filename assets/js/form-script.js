@@ -742,7 +742,10 @@ function showPreview() {
     const modal = document.getElementById('previewModal');
     modal.style.display = 'flex';
     
-    // Reset scroll to top when modal opens
+    // Scroll page to top so modal is visible
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Reset modal scroll to top
     const modalContent = modal.querySelector('.modal-content');
     if (modalContent) {
         modalContent.scrollTop = 0;
@@ -1309,7 +1312,10 @@ function showSuccess(slug, result) {
     
     modal.style.display = 'flex';
     
-    // Reset scroll to top when success modal opens
+    // Scroll page to top so modal is visible
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Reset modal scroll to top
     const modalContent = modal.querySelector('.modal-content');
     if (modalContent) {
         modalContent.scrollTop = 0;
@@ -1401,7 +1407,10 @@ configBtn?.addEventListener('click', () => {
         tokenStatus.className = 'success';
     }
     
-    // Reset scroll to top when modal opens
+    // Scroll page to top so modal is visible
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Reset modal scroll to top
     const modalContent = githubModal.querySelector('.modal-content');
     if (modalContent) {
         modalContent.scrollTop = 0;
