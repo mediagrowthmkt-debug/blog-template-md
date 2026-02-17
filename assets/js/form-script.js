@@ -741,6 +741,12 @@ function showPreview() {
     
     const modal = document.getElementById('previewModal');
     modal.style.display = 'flex';
+    
+    // Reset scroll to top when modal opens
+    const modalContent = modal.querySelector('.modal-content');
+    if (modalContent) {
+        modalContent.scrollTop = 0;
+    }
 }
 
 function generatePreviewHtml(data) {
@@ -1302,6 +1308,12 @@ function showSuccess(slug, result) {
     };
     
     modal.style.display = 'flex';
+    
+    // Reset scroll to top when success modal opens
+    const modalContent = modal.querySelector('.modal-content');
+    if (modalContent) {
+        modalContent.scrollTop = 0;
+    }
 }
 
 function showLoading() {
@@ -1387,6 +1399,12 @@ configBtn?.addEventListener('click', () => {
         githubTokenInput.value = '••••••••••••••••••••';
         tokenStatus.textContent = '✅ Token já configurado';
         tokenStatus.className = 'success';
+    }
+    
+    // Reset scroll to top when modal opens
+    const modalContent = githubModal.querySelector('.modal-content');
+    if (modalContent) {
+        modalContent.scrollTop = 0;
     }
 });
 
