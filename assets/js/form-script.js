@@ -734,16 +734,16 @@ function showPreview() {
     console.log('📸 Imagens Internas no Preview:', formData.internalImages);
     console.log('🔗 URLs convertidas:', formData.internalImages.map(img => img.url));
     
-    const previewHtml = generatePreviewHtml(formData);
+    const previewHtml = generateFullPreviewPage(formData);
     
-    const previewContent = document.getElementById('previewContent');
-    previewContent.innerHTML = previewHtml;
-    
-    const modal = document.getElementById('previewModal');
-    modal.style.display = 'flex';
+    // Open preview in new window
+    const previewWindow = window.open('', '_blank');
+    previewWindow.document.open();
+    previewWindow.document.write(previewHtml);
+    previewWindow.document.close();
 }
 
-function generatePreviewHtml(data) {
+function generateFullPreviewPage(data) {
     // Gera HTML das imagens internas
     const internalImagesHtml = data.internalImages && data.internalImages.length > 0 
         ? `<div class="internal-images" style="margin: 30px 0;">
@@ -757,38 +757,161 @@ function generatePreviewHtml(data) {
            </div>`
         : '';
     
-    return `
-        <div class="preview-post">
-            <header>
-                <div class="category-badge">${data.category}</div>
-                <h1>${data.h1Title}</h1>
-                <div class="meta">
-                    <span>Por ${data.author}</span>
-                    <span>${data.datePublishedFormatted}</span>
-                    <span>⏱️ ${data.readTime} min</span>
-                </div>
-            </header>
-            
-            <img src="${data.coverImage}" alt="${data.coverImageAlt}" style="max-width: 100%; height: auto;">
-            
-            <div class="content">
-                <div class="intro">${data.introduction}</div>
-                ${data.contentBody}
-                ${internalImagesHtml}
-                <div class="conclusion">${data.conclusion}</div>
-            </div>
-            
-            <div class="tags">
-                ${data.tagsArray.map(tag => `<span class="tag">#${tag.trim()}</span>`).join(' ')}
-            </div>
-            
-            <div class="cta">
-                <h3>${data.ctaTitle}</h3>
-                <p>${data.ctaText}</p>
-                <a href="${data.ctaLink}" class="cta-btn">${data.ctaButtonText}</a>
+    return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pré-visualização: ${data.h1Title || 'Novo Post'}</title>
+    <link href="https://api.fontshare.com/v2/css?f[]=mazzard-h@400,700&f[]=mazzard-m@400,600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Mazzard M', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000;
+            color: #fff;
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+        .preview-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 50px;
+            border-radius: 24px;
+        }
+        .preview-header {
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .category-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: #EB7A3D;
+            color: #fff;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        h1 {
+            font-family: 'Mazzard H', sans-serif;
+            font-size: 2.5rem;
+            color: #fff;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+        .meta {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.95rem;
+        }
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .cover-image {
+            width: 100%;
+            border-radius: 16px;
+            margin: 30px 0;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+        .content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        .content p {
+            margin-bottom: 20px;
+        }
+        .internal-images figure {
+            margin: 30px 0;
+        }
+        .internal-images img {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+        .internal-images figcaption {
+            margin-top: 12px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+            font-style: italic;
+            text-align: center;
+        }
+        .tags {
+            margin: 40px 0;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .tag {
+            display: inline-block;
+            padding: 6px 14px;
+            background: rgba(235, 122, 61, 0.15);
+            color: #EB7A3D;
+            border: 1px solid rgba(235, 122, 61, 0.3);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .preview-notice {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(235, 122, 61, 0.95);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 20px rgba(235, 122, 61, 0.4);
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="preview-notice">📸 Modo Pré-visualização</div>
+    <div class="preview-container">
+        <div class="preview-header">
+            <span class="category-badge">${data.category || 'Categoria'}</span>
+            <h1>${data.h1Title || 'Título do Post'}</h1>
+            <div class="meta">
+                <span class="meta-item">✍️ Por ${data.author || 'Autor'}</span>
+                <span class="meta-item">📅 ${data.datePublished || new Date().toLocaleDateString('pt-BR')}</span>
+                <span class="meta-item">⏱️ ${data.readTime || '5'} min de leitura</span>
             </div>
         </div>
-    `;
+        
+        ${data.coverImage ? `
+            <img src="${data.coverImage}" alt="${data.coverImageAlt || ''}" class="cover-image">
+            ${data.coverImageCaption ? `<p style="text-align: center; margin-top: -20px; margin-bottom: 30px; font-size: 0.9rem; color: rgba(255,255,255,0.5); font-style: italic;">${data.coverImageCaption}</p>` : ''}
+        ` : ''}
+        
+        <div class="content">
+            ${data.content ? data.content.replace(/\n/g, '<br>') : '<p>Conteúdo do post será exibido aqui...</p>'}
+            
+            ${internalImagesHtml}
+        </div>
+        
+        ${data.secondaryKeywords ? `
+            <div class="tags">
+                ${data.secondaryKeywords.split(',').map(tag => 
+                    `<span class="tag">#${tag.trim()}</span>`
+                ).join('')}
+            </div>
+        ` : ''}
+    </div>
+</body>
+</html>`;
 }
 
 // ======================
