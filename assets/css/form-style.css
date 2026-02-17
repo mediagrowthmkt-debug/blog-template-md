@@ -494,10 +494,11 @@ input[type="checkbox"] {
     height: 100%;
     background: rgba(0, 0, 0, 0.9);
     z-index: 1000;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    padding: 20px;
+    padding: 40px 20px 20px;
     backdrop-filter: blur(10px);
+    overflow-y: auto;
 }
 
 .modal-content {
@@ -506,12 +507,13 @@ input[type="checkbox"] {
     padding: 30px;
     border-radius: 20px;
     max-width: 700px;
-    max-height: 75vh;
-    overflow-y: auto;
+    max-height: none;
+    overflow-y: visible;
     position: relative;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
     animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     backdrop-filter: blur(20px);
+    margin-bottom: 40px;
 }
 
 @keyframes modalSlideIn {
@@ -712,7 +714,11 @@ body.loading {
     
     .modal-content {
         padding: 20px;
-        max-height: 80vh;
+        max-height: none;
+    }
+    
+    .modal {
+        padding: 20px;
     }
     
     .form-actions {
