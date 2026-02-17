@@ -494,9 +494,9 @@ input[type="checkbox"] {
     height: 100%;
     background: rgba(0, 0, 0, 0.9);
     z-index: 1000;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
-    padding: 40px 20px 20px;
+    padding: 20px;
     backdrop-filter: blur(10px);
     overflow-y: auto;
 }
@@ -504,26 +504,25 @@ input[type="checkbox"] {
 .modal-content {
     background: rgba(26, 26, 26, 0.95);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 30px;
-    border-radius: 20px;
-    max-width: 700px;
-    max-height: none;
-    overflow-y: visible;
+    padding: 25px;
+    border-radius: 16px;
+    max-width: 800px;
+    max-height: 85vh;
+    overflow-y: auto;
     position: relative;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
-    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: modalSlideIn 0.3s ease-out;
     backdrop-filter: blur(20px);
-    margin-bottom: 40px;
 }
 
 @keyframes modalSlideIn {
     from {
         opacity: 0;
-        transform: translateY(-50px) scale(0.95);
+        transform: scale(0.95);
     }
     to {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: scale(1);
     }
 }
 
@@ -714,11 +713,11 @@ body.loading {
     
     .modal-content {
         padding: 20px;
-        max-height: none;
+        max-height: 90vh;
     }
     
     .modal {
-        padding: 20px;
+        padding: 15px;
     }
     
     .form-actions {

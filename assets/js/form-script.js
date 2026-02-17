@@ -742,9 +742,6 @@ function showPreview() {
     const modal = document.getElementById('previewModal');
     modal.style.display = 'flex';
     
-    // Scroll page to top so modal is visible
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    
     // Reset modal scroll to top
     const modalContent = modal.querySelector('.modal-content');
     if (modalContent) {
@@ -1312,9 +1309,6 @@ function showSuccess(slug, result) {
     
     modal.style.display = 'flex';
     
-    // Scroll page to top so modal is visible
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    
     // Reset modal scroll to top
     const modalContent = modal.querySelector('.modal-content');
     if (modalContent) {
@@ -1406,9 +1400,6 @@ configBtn?.addEventListener('click', () => {
         tokenStatus.textContent = '✅ Token já configurado';
         tokenStatus.className = 'success';
     }
-    
-    // Scroll page to top so modal is visible
-    window.scrollTo({ top: 0, behavior: 'smooth' });
     
     // Reset modal scroll to top
     const modalContent = githubModal.querySelector('.modal-content');
