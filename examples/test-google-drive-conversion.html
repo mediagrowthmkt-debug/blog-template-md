@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Conversão Google Drive</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid #007bff;
+        }
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+        .error {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste de Conversão Google Drive</h1>
+    
+    <div class="test-box">
+        <h2>📋 Exemplo de Link do Google Drive</h2>
+        <p>Copie este link de teste:</p>
+        <code id="exampleLink">https://drive.google.com/file/d/1NwrNRWfVmPxeTENcY-6LtNHkuZKZ39rj/view?usp=sharing</code>
+        <button onclick="copyExample()">📋 Copiar Exemplo</button>
+    </div>
+
+    <div class="test-box">
+        <h2>🔗 Testar Conversão</h2>
+        <label>Cole o link do Google Drive aqui:</label>
+        <input type="text" id="inputUrl" placeholder="https://drive.google.com/file/d/...">
+        <button onclick="testConversion()">🔄 Converter</button>
+        <button onclick="testImage()">🖼️ Testar Imagem</button>
+        
+        <div id="result"></div>
+        <div id="imagePreview"></div>
+    </div>
+
+    <div class="test-box">
+        <h2>✅ Formatos Suportados</h2>
+        <ul>
+            <li><code>https://drive.google.com/file/d/FILE_ID/view?usp=sharing</code></li>
+            <li><code>https://drive.google.com/open?id=FILE_ID</code></li>
+            <li><code>https://drive.google.com/uc?id=FILE_ID</code></li>
+        </ul>
+    </div>
+
+    <script>
+        // Função de conversão (mesma do sistema)
+        function convertGoogleDriveUrl(url) {
+            if (!url || typeof url !== 'string') {
+                return url;
+            }
+            
+            url = url.trim();
+            
+            if (!url.includes('drive.google.com')) {
+                return url;
+            }
+            
+            let fileId = null;
+            
+            const pattern1 = /drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/;
+            const match1 = url.match(pattern1);
+            if (match1) {
+                fileId = match1[1];
+            }
+            
+            const pattern2 = /drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/;
+            const match2 = url.match(pattern2);
+            if (match2) {
+                fileId = match2[1];
+            }
+            
+            const pattern3 = /drive\.google\.com\/uc\?id=([a-zA-Z0-9_-]+)/;
+            const match3 = url.match(pattern3);
+            if (match3) {
+                fileId = match3[1];
+            }
+            
+            if (fileId) {
+                return `https://drive.google.com/uc?export=view&id=${fileId}`;
+            }
+            
+            return url;
+        }
+
+        function copyExample() {
+            const text = document.getElementById('exampleLink').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('✅ Link copiado!');
+            });
+        }
+
+        function testConversion() {
+            const input = document.getElementById('inputUrl').value;
+            const result = document.getElementById('result');
+            
+            if (!input) {
+                result.innerHTML = '<div class="result error">⚠️ Por favor, cole um link!</div>';
+                return;
+            }
+
+            const converted = convertGoogleDriveUrl(input);
+            
+            let html = '<div class="result success">';
+            html += '<h3>✅ Conversão bem-sucedida!</h3>';
+            html += '<p><strong>URL Original:</strong><br><code>' + input + '</code></p>';
+            html += '<p><strong>URL Convertida:</strong><br><code>' + converted + '</code></p>';
+            
+            if (converted !== input) {
+                html += '<p style="color: #28a745;">✨ URL foi convertida com sucesso!</p>';
+            } else {
+                html += '<p style="color: #ffc107;">ℹ️ URL não é do Google Drive ou já está no formato correto.</p>';
+            }
+            html += '</div>';
+            
+            result.innerHTML = html;
+        }
+
+        function testImage() {
+            const input = document.getElementById('inputUrl').value;
+            const preview = document.getElementById('imagePreview');
+            
+            if (!input) {
+                alert('⚠️ Por favor, cole um link primeiro!');
+                return;
+            }
+
+            const converted = convertGoogleDriveUrl(input);
+            
+            let html = '<div class="result">';
+            html += '<h3>🖼️ Preview da Imagem:</h3>';
+            html += '<p><small>Se a imagem não carregar, verifique se o compartilhamento está público.</small></p>';
+            html += '<img src="' + converted + '" alt="Teste de imagem" onerror="this.parentElement.innerHTML += \'<p class=error>❌ Erro ao carregar imagem. Verifique se o arquivo está com compartilhamento público.</p>\'">';
+            html += '</div>';
+            
+            preview.innerHTML = html;
+        }
+
+        // Auto-preenche com exemplo ao carregar
+        window.onload = function() {
+            document.getElementById('inputUrl').value = 'https://drive.google.com/file/d/1NwrNRWfVmPxeTENcY-6LtNHkuZKZ39rj/view?usp=sharing';
+        }
+    </script>
+</body>
+</html>
