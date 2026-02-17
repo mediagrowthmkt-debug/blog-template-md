@@ -14,9 +14,10 @@ function saveFormToLocalStorage() {
     const formData = {};
     const form = document.getElementById('blogForm');
     
-    // Salva todos os inputs e textareas
+    // Salva todos os inputs e textareas (exceto aiTemplate)
     form.querySelectorAll('input, textarea, select').forEach(field => {
         if (field.type === 'button' || field.type === 'submit') return;
+        if (field.id === 'aiTemplate') return; // Não salvar o template de IA
         
         if (field.type === 'checkbox') {
             formData[field.id || field.name] = field.checked;
@@ -46,6 +47,8 @@ function loadFormFromLocalStorage() {
         Object.keys(formData).forEach(key => {
             // Pula campos array por enquanto
             if (key.includes('[]')) return;
+            // Não restaurar o template de IA
+            if (key === 'aiTemplate') return;
             
             const field = form.querySelector(`#${key}`) || form.querySelector(`[name="${key}"]`);
             
