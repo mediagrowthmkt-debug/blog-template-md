@@ -393,46 +393,101 @@
                 </div>
             </section>
 
-            <!-- 🚀 BLOCO 7: ENGAJAMENTO -->
+            <!-- 🚀 BLOCO 7: FORMULÁRIO DE CAPTAÇÃO -->
             <section class="form-section">
-                <h2>🚀 BLOCO 7: Engajamento (SEO Indireto)</h2>
+                <h2>🚀 BLOCO 7: Formulário de Captação</h2>
                 
                 <div class="form-group required">
-                    <label for="ctaTitle">Título do CTA</label>
+                    <label for="formTitle">
+                        Título do Formulário
+                        <span class="tooltip">Crie um gancho com o conteúdo do post</span>
+                    </label>
                     <input type="text" 
-                           id="ctaTitle" 
-                           name="ctaTitle" 
+                           id="formTitle" 
+                           name="formTitle" 
                            required
-                           placeholder="Precisa de Instalação Profissional?">
+                           placeholder="Quer um Orçamento Gratuito para Instalação de Granito?">
                 </div>
 
                 <div class="form-group required">
-                    <label for="ctaText">Texto do CTA</label>
-                    <textarea id="ctaText" 
-                              name="ctaText" 
+                    <label for="formSubtitle">Subtítulo/Descrição do Formulário</label>
+                    <textarea id="formSubtitle" 
+                              name="formSubtitle" 
                               rows="2" 
                               required
-                              placeholder="Entre em contato conosco e receba um orçamento gratuito para instalação de granito premium."></textarea>
+                              placeholder="Preencha o formulário abaixo e nossa equipe entrará em contato em até 24h com um orçamento personalizado."></textarea>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group required">
-                        <label for="ctaLink">Link do CTA</label>
-                        <input type="url" 
-                               id="ctaLink" 
-                               name="ctaLink" 
-                               required
-                               placeholder="https://SEU-DOMINIO.com/contato">
-                    </div>
+                <div class="form-group required">
+                    <label for="formButtonText">Texto do Botão de Envio</label>
+                    <input type="text" 
+                           id="formButtonText" 
+                           name="formButtonText" 
+                           required
+                           value="Solicitar Orçamento Grátis"
+                           placeholder="Solicitar Orçamento Grátis">
+                </div>
 
-                    <div class="form-group required">
-                        <label for="ctaButtonText">Texto do Botão</label>
-                        <input type="text" 
-                               id="ctaButtonText" 
-                               name="ctaButtonText" 
-                               required
-                               placeholder="Solicitar Orçamento">
-                    </div>
+                <div class="form-group required">
+                    <label for="webhookUrl">
+                        Webhook URL (Make.com)
+                        <span class="tooltip">URL do webhook para enviar os dados do formulário</span>
+                    </label>
+                    <input type="url" 
+                           id="webhookUrl" 
+                           name="webhookUrl" 
+                           required
+                           placeholder="https://hook.us2.make.com/xxxxxx">
+                </div>
+
+                <div class="form-group required">
+                    <label for="campaignName">Nome da Campanha</label>
+                    <input type="text" 
+                           id="campaignName" 
+                           name="campaignName" 
+                           required
+                           placeholder="Blog MediaGrowth - Instalação Granito">
+                </div>
+
+                <div class="form-group">
+                    <label for="qualifiedQuestion">
+                        Pergunta Qualificatória (opcional)
+                        <span class="tooltip">Pergunta adicional para qualificar o lead</span>
+                    </label>
+                    <input type="text" 
+                           id="qualifiedQuestion" 
+                           name="qualifiedQuestion" 
+                           placeholder="Quando você pretende fazer a instalação?">
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" 
+                               id="formCollectEmail" 
+                               name="formCollectEmail" 
+                               checked>
+                        Coletar E-mail
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" 
+                               id="formCollectPhone" 
+                               name="formCollectPhone" 
+                               checked>
+                        Coletar Telefone
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" 
+                               id="formCollectName" 
+                               name="formCollectName" 
+                               checked>
+                        Coletar Nome
+                    </label>
                 </div>
             </section>
 

@@ -914,12 +914,95 @@ function generateFullPreviewPage(data) {
             </div>
         ` : ''}
         
-        ${data.ctaTitle ? `
-            <div class="cta" style="margin-top: 40px; padding: 30px; background: linear-gradient(135deg, #EB7A3D, #d66a2e); border-radius: 16px; text-align: center;">
-                <h3 style="font-size: 1.8rem; margin-bottom: 15px;">${data.ctaTitle}</h3>
-                <p style="font-size: 1.1rem; margin-bottom: 20px; opacity: 0.95;">${data.ctaText || ''}</p>
-                ${data.ctaLink ? `<a href="${data.ctaLink}" style="display: inline-block; padding: 14px 32px; background: #fff; color: #EB7A3D; text-decoration: none; border-radius: 30px; font-weight: 700; font-size: 1rem; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">${data.ctaButtonText || 'Saiba Mais'}</a>` : ''}
+        ${data.formTitle ? `
+            <div class="lead-form" style="margin-top: 50px; padding: 40px; background: linear-gradient(135deg, rgba(235, 122, 61, 0.15), rgba(214, 106, 46, 0.15)); border: 2px solid rgba(235, 122, 61, 0.3); border-radius: 20px;">
+                <h3 style="font-size: 2rem; margin-bottom: 15px; text-align: center; color: #EB7A3D;">${data.formTitle}</h3>
+                <p style="font-size: 1.1rem; margin-bottom: 30px; text-align: center; opacity: 0.9;">${data.formSubtitle || ''}</p>
+                
+                <form id="leadCaptureForm" style="max-width: 500px; margin: 0 auto;">
+                    ${data.formCollectName ? `
+                        <div style="margin-bottom: 20px;">
+                            <input type="text" name="name" required placeholder="Seu Nome *" style="width: 100%; padding: 15px; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; background: rgba(0,0,0,0.3); color: #fff; font-size: 1rem;">
+                        </div>
+                    ` : ''}
+                    
+                    ${data.formCollectEmail ? `
+                        <div style="margin-bottom: 20px;">
+                            <input type="email" name="email" required placeholder="Seu E-mail *" style="width: 100%; padding: 15px; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; background: rgba(0,0,0,0.3); color: #fff; font-size: 1rem;">
+                        </div>
+                    ` : ''}
+                    
+                    ${data.formCollectPhone ? `
+                        <div style="margin-bottom: 20px;">
+                            <input type="tel" name="phone" required placeholder="Seu Telefone *" style="width: 100%; padding: 15px; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; background: rgba(0,0,0,0.3); color: #fff; font-size: 1rem;">
+                        </div>
+                    ` : ''}
+                    
+                    ${data.qualifiedQuestion ? `
+                        <div style="margin-bottom: 20px;">
+                            <input type="text" name="qualified_answer" placeholder="${data.qualifiedQuestion}" style="width: 100%; padding: 15px; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; background: rgba(0,0,0,0.3); color: #fff; font-size: 1rem;">
+                        </div>
+                    ` : ''}
+                    
+                    <button type="submit" style="width: 100%; padding: 16px; background: #EB7A3D; color: #fff; border: none; border-radius: 30px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.background='#d66a2e'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 20px rgba(235,122,61,0.4)'" onmouseout="this.style.background='#EB7A3D'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                        ${data.formButtonText || 'Enviar'}
+                    </button>
+                </form>
+                
+                <div id="formMessage" style="margin-top: 20px; text-align: center; font-weight: 600; display: none;"></div>
             </div>
+            
+            <script>
+            document.getElementById('leadCaptureForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const formButton = this.querySelector('button[type="submit"]');
+                const formMessage = document.getElementById('formMessage');
+                
+                // Disable button
+                formButton.disabled = true;
+                formButton.textContent = 'Enviando...';
+                
+                // Prepare webhook data
+                const webhookData = {
+                    email: formData.get('email') || '',
+                    phone: formData.get('phone') || '',
+                    name: formData.get('name') || '',
+                    campaign_name: '${data.campaignName || ''}',
+                    page_name: '${data.h1Title || ''}',
+                    FONTE: window.location.href,
+                    PLATAFORMA: 'BLOG',
+                    ${data.qualifiedQuestion ? `Qualified_question: formData.get('qualified_answer') || '',` : ''}
+                };
+                
+                try {
+                    const response = await fetch('${data.webhookUrl}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(webhookData)
+                    });
+                    
+                    if (response.ok) {
+                        formMessage.style.display = 'block';
+                        formMessage.style.color = '#4ade80';
+                        formMessage.textContent = '✅ Mensagem enviada com sucesso! Entraremos em contato em breve.';
+                        this.reset();
+                    } else {
+                        throw new Error('Erro no envio');
+                    }
+                } catch (error) {
+                    formMessage.style.display = 'block';
+                    formMessage.style.color = '#ef4444';
+                    formMessage.textContent = '❌ Erro ao enviar. Tente novamente.';
+                } finally {
+                    formButton.disabled = false;
+                    formButton.textContent = '${data.formButtonText || 'Enviar'}';
+                }
+            });
+            </script>
         ` : ''}
     </div>
 </body>
@@ -1171,11 +1254,16 @@ function collectFormData() {
         tagsArray: tagsArray,
         relatedPosts: formData.get('relatedPosts'),
         
-        // Bloco 7
-        ctaTitle: formData.get('ctaTitle'),
-        ctaText: formData.get('ctaText'),
-        ctaLink: formData.get('ctaLink'),
-        ctaButtonText: formData.get('ctaButtonText'),
+        // Bloco 7 - Formulário
+        formTitle: formData.get('formTitle'),
+        formSubtitle: formData.get('formSubtitle'),
+        formButtonText: formData.get('formButtonText'),
+        webhookUrl: formData.get('webhookUrl'),
+        campaignName: formData.get('campaignName'),
+        qualifiedQuestion: formData.get('qualifiedQuestion') || '',
+        formCollectEmail: formData.get('formCollectEmail') === 'on',
+        formCollectPhone: formData.get('formCollectPhone') === 'on',
+        formCollectName: formData.get('formCollectName') === 'on',
         
         // Bloco 8
         siteUrl: siteUrl,
