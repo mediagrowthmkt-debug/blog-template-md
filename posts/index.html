@@ -200,6 +200,8 @@
                 }
                 
                 const files = await response.json();
+                console.log('📁 Arquivos encontrados:', files.length);
+                console.log('📄 Arquivos:', files.map(f => f.name));
                 
                 // Filtrar apenas arquivos HTML (excluir README.md e index.html)
                 const htmlFiles = files.filter(file => 
@@ -207,6 +209,9 @@
                     file.name !== 'index.html' &&
                     file.type === 'file'
                 );
+                
+                console.log('✅ Posts HTML encontrados:', htmlFiles.length);
+                console.log('📝 Posts:', htmlFiles.map(f => f.name));
                 
                 if (htmlFiles.length === 0) {
                     container.innerHTML = `
