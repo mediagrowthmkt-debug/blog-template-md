@@ -830,29 +830,22 @@ function generateFullPreviewPage(data) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pré-visualização: ${data.h1Title || 'Novo Post'}</title>
-    <link href="https://api.fontshare.com/v2/css?f[]=mazzard-h@400,700&f[]=mazzard-m@400,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/blog-post.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Mazzard M', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #000;
-            color: #fff;
-            line-height: 1.6;
-            padding: 40px 20px;
-        }
-        .preview-container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 50px;
-            border-radius: 24px;
-        }
-        .preview-header {
-            margin-bottom: 40px;
-            padding-bottom: 30px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        /* Banner de Preview */
+        body::before {
+            content: "👁️ MODO PREVIEW - Este é o layout exato do post publicado";
+            display: block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-weight: bold;
+            font-size: 14px;
+            position: sticky;
+            top: 0;
+            z-index: 10000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
         .category-badge {
             display: inline-block;
@@ -1051,71 +1044,103 @@ function generateFullPreviewPage(data) {
     </style>
 </head>
 <body>
-    <div class="preview-notice">📸 Modo Pré-visualização</div>
-    <div class="preview-container">
-        <div class="preview-header">
-            <span class="category-badge">${data.category || 'Categoria'}</span>
-            <h1>${data.h1Title || 'Título do Post'}</h1>
-            <div class="meta">
-                <span class="meta-item">✍️ Por ${data.author || 'Autor'}</span>
-                <span class="meta-item">📅 ${data.datePublishedFormatted || new Date().toLocaleDateString('pt-BR')}</span>
-                <span class="meta-item">⏱️ ${data.readTime || '5'} min de leitura</span>
+    <!-- NAVIGATION -->
+    <nav class="main-navigation" aria-label="Main Navigation">
+        <div class="nav-container">
+            <a href="${data.siteUrl || '#'}" class="nav-link">Home</a>
+            <a href="/posts" class="nav-link">Blog</a>
+        </div>
+    </nav>
+
+    <!-- ARTICLE CONTAINER -->
+    <article class="blog-post">
+        <!-- HEADER -->
+        <header class="post-header">
+            <!-- CATEGORY BADGE -->
+            <div class="post-meta-top">
+                <span class="category-badge">${data.category || 'Categoria'}</span>
+                <span class="read-time">⏱️ ${data.readTime || '5'} min de leitura</span>
             </div>
-        </div>
-        
-        ${data.coverImage ? `
-            <img src="${data.coverImage}" alt="${data.coverImageAlt || ''}" class="cover-image">
-            ${data.coverImageCaption ? `<p style="text-align: center; margin-top: -20px; margin-bottom: 30px; font-size: 0.9rem; color: rgba(255,255,255,0.5); font-style: italic;">${data.coverImageCaption}</p>` : ''}
-        ` : ''}
-        
-        <div class="content">
-            ${data.introduction ? `<div class="introduction" style="font-size: 1.2rem; font-weight: 500; margin-bottom: 30px; padding-left: 20px; border-left: 4px solid #EB7A3D;">${data.introduction.replace(/\n/g, '<br>')}</div>` : ''}
             
-            <div class="main-content">${contentWithImages}</div>
+            <!-- H1 TITLE -->
+            <h1 class="post-title">${data.h1Title || 'Título do Post'}</h1>
             
-            ${data.conclusion ? `<div class="conclusion" style="margin-top: 40px; padding: 20px; background: rgba(255,255,255,0.03); border-radius: 12px;">${data.conclusion.replace(/\n/g, '<br>')}</div>` : ''}
+            <!-- AUTHOR & DATE -->
+            <div class="post-meta">
+                <div class="author-info">
+                    <img src="${data.authorAvatar || 'https://via.placeholder.com/100'}" alt="${data.author || 'Autor'}" class="author-avatar">
+                    <div>
+                        <span class="author-name">${data.author || 'Autor'}</span>
+                        <time datetime="${data.datePublishedISO || new Date().toISOString()}" class="publish-date">${data.datePublishedFormatted || new Date().toLocaleDateString('pt-BR')}</time>
+                    </div>
+                </div>
+                <div class="post-actions">
+                    <button class="share-btn" aria-label="Compartilhar">🔗 Compartilhar</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- COVER IMAGE -->
+        <figure class="post-cover">
+            <img src="${data.coverImage || 'https://via.placeholder.com/1200x630'}" 
+                 alt="${data.coverImageAlt || 'Imagem de capa'}" 
+                 width="1200" 
+                 height="630"
+                 loading="eager">
+            <figcaption>${data.coverImageCaption || ''}</figcaption>
+        </figure>
+
+        <!-- INTRODUCTION -->
+        <div class="post-intro">
+            ${data.introduction || '<p>Introdução do post...</p>'}
         </div>
-        
-        ${data.secondaryKeywords ? `
+
+        <!-- MAIN CONTENT -->
+        <div class="post-content">
+            ${contentWithImages}
+        </div>
+
+        <!-- CONCLUSION -->
+        <div class="post-conclusion">
+            ${data.conclusion || '<p>Conclusão do post...</p>'}
+        </div>
+
+        <!-- TAGS -->
+        <footer class="post-footer">
             <div class="tags">
-                ${data.secondaryKeywords.split(',').map(tag => 
-                    `<span class="tag">#${tag.trim()}</span>`
-                ).join('')}
+                <strong>Tags:</strong>
+                ${data.tagsArray ? data.tagsArray.map(tag => `<a href="#" class="tag">#${tag}</a>`).join(' ') : ''}
             </div>
-        ` : ''}
-        
-        ${data.formTitle ? `
-            <div class="lead-form" style="margin-top: 50px; padding: 40px; background: linear-gradient(135deg, rgba(235, 122, 61, 0.15), rgba(214, 106, 46, 0.15)); border: 2px solid rgba(235, 122, 61, 0.3); border-radius: 20px;">
-                <h3 style="font-size: 2rem; margin-bottom: 15px; text-align: center; color: #EB7A3D;">${data.formTitle}</h3>
-                <p style="font-size: 1.1rem; margin-bottom: 30px; text-align: center; opacity: 0.9;">${data.formSubtitle || ''}</p>
-                
-                <form id="leadCaptureForm" style="max-width: 500px; margin: 0 auto;">
-                    ${data.formCollectName ? `
-                        <div style="margin-bottom: 20px;">
-                            <input type="text" name="name" required placeholder="Seu Nome *" style="width: 100%; padding: 15px; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; background: rgba(0,0,0,0.3); color: #fff; font-size: 1rem;">
-                        </div>
-                    ` : ''}
-                    
-                    ${data.formCollectEmail ? `
-                        <div style="margin-bottom: 20px;">
-                            <input type="email" name="email" required placeholder="Seu E-mail *" style="width: 100%; padding: 15px; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; background: rgba(0,0,0,0.3); color: #fff; font-size: 1rem;">
-                        </div>
-                    ` : ''}
-                    
-                    ${data.formCollectPhone ? `
-                        <div style="margin-bottom: 20px;">
-                            <input type="tel" name="phone" required placeholder="Seu Telefone *" style="width: 100%; padding: 15px; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; background: rgba(0,0,0,0.3); color: #fff; font-size: 1rem;">
-                        </div>
-                    ` : ''}
-                    
-                    ${data.qualifiedQuestion ? `
-                        <div style="margin-bottom: 20px;">
-                            <input type="text" name="qualified_answer" placeholder="${data.qualifiedQuestion}" style="width: 100%; padding: 15px; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; background: rgba(0,0,0,0.3); color: #fff; font-size: 1rem;">
-                        </div>
-                    ` : ''}
-                    
-                    <button type="submit" style="width: 100%; padding: 16px; background: #EB7A3D; color: #fff; border: none; border-radius: 30px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.background='#d66a2e'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 20px rgba(235,122,61,0.4)'" onmouseout="this.style.background='#EB7A3D'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-                        ${data.formButtonText || 'Enviar'}
+            
+            <!-- CTA -->
+            <div class="post-cta">
+                <h3>${data.ctaTitle || 'Pronto para começar?'}</h3>
+                <p>${data.ctaText || 'Entre em contato conosco hoje!'}</p>
+                <a href="${data.ctaLink || '#'}" class="cta-button">${data.ctaButtonText || 'Fale Conosco'}</a>
+            </div>
+        </footer>
+    </article>
+
+    <!-- RELATED POSTS -->
+    <aside class="related-posts">
+        <h2>Posts Relacionados</h2>
+        <div class="related-grid">
+            <!-- Posts relacionados serão adicionados automaticamente -->
+        </div>
+    </aside>
+
+    <!-- BACK TO TOP -->
+    <button id="backToTop" class="back-to-top" aria-label="Voltar ao topo">↑</button>
+
+    <!-- SCRIPTS -->
+    <script src="assets/js/blog-post.js"></script>
+</body>
+</html>`;
+}
+
+// ======================
+// FORM SUBMISSION
+// ======================
                     </button>
                 </form>
                 
