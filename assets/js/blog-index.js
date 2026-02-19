@@ -43,18 +43,47 @@ async function initBlog() {
 
 async function loadPosts() {
     try {
-        // Get all HTML files from posts folder
-        const response = await fetch('posts/');
-        const text = await response.text();
+        // Detectar se está rodando localmente ou no GitHub Pages
+        const isLocal = window.location.hostname === 'localhost' || 
+                       window.location.hostname === '127.0.0.1' ||
+                       window.location.protocol === 'file:';
         
-        // Parse HTML files (simple approach)
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(text, 'text/html');
-        const links = doc.querySelectorAll('a[href$=".html"]');
+        console.log('🌍 Ambiente:', isLocal ? 'LOCAL' : 'GITHUB PAGES');
         
-        const postPromises = Array.from(links)
-            .filter(link => !link.href.includes('index.html'))
-            .map(link => loadPostMetadata(link.href));
+        let htmlFiles = [];
+        
+        if (isLocal) {
+            // Modo LOCAL - Lista manual de posts
+            htmlFiles = [
+                { name: 'marble-or-granite-guide-for-your-home-in-worcester.html' },
+                { name: 'window-replacement-massachusetts-guide.html' }
+            ];
+            console.log('📁 Posts locais:', htmlFiles.length);
+        } else {
+            // Modo GITHUB PAGES - Busca via API
+            const response = await fetch('https://api.github.com/repos/mediagrowthmkt-debug/blog-template-md/contents/posts');
+            
+            if (!response.ok) {
+                throw new Error('Erro ao buscar posts da API');
+            }
+            
+            const files = await response.json();
+            console.log('📁 Arquivos da API:', files.length);
+            
+            // Filtrar apenas arquivos HTML (excluir README.md e index.html)
+            htmlFiles = files.filter(file => 
+                file.name.endsWith('.html') && 
+                file.name !== 'index.html' &&
+                file.type === 'file'
+            ).map(file => ({ name: file.name }));
+            
+            console.log('✅ Posts encontrados:', htmlFiles.length);
+        }
+        
+        // Carregar metadados de cada post
+        const postPromises = htmlFiles.map(file => 
+            loadPostMetadata(`posts/${file.name}`)
+        );
         
         allPosts = await Promise.all(postPromises);
         allPosts = allPosts.filter(post => post !== null);
@@ -62,8 +91,10 @@ async function loadPosts() {
         // Sort by date (newest first)
         allPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
         
+        console.log('📚 Total de posts carregados:', allPosts.length);
+        
     } catch (error) {
-        console.error('Erro ao carregar posts:', error);
+        console.error('❌ Erro ao carregar posts:', error);
         // Fallback: use example post
         allPosts = getExamplePosts();
     }
