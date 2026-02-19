@@ -193,7 +193,7 @@
             
             try {
                 // Buscar arquivos da pasta posts/ via GitHub API
-                const response = await fetch('https://api.github.com/repos/SEU-USUARIO-GITHUB/SEU-BLOG-REPO/contents/posts');
+                const response = await fetch('https://api.github.com/repos/mediagrowthmkt-debug/blog-template-md/contents/posts');
                 
                 if (!response.ok) {
                     throw new Error('Erro ao buscar posts');
