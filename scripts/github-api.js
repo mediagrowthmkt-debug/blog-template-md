@@ -117,8 +117,9 @@ class GitHubBlogPublisher {
      */
     getHeaders() {
         return {
-            'Authorization': `token ${this.token}`,
-            'Accept': 'application/vnd.github.v3+json',
+            'Authorization': `Bearer ${this.token}`,
+            'Accept': 'application/vnd.github+json',
+            'X-GitHub-Api-Version': '2022-11-28',
             'Content-Type': 'application/json'
         };
     }
@@ -127,8 +128,8 @@ class GitHubBlogPublisher {
      * Obter URL pública do post
      */
     getPublicUrl(slug) {
-        // GitHub Pages URL
-        return `https://blog.SEU-DOMINIO.com/posts/${slug}.html`;
+        // GitHub Pages URL dinâmica baseada no repositório
+        return `https://${this.owner}.github.io/${this.repo}/posts/${slug}.html`;
     }
 }
 
@@ -144,13 +145,14 @@ function initGitHubPublisher() {
     const token = localStorage.getItem('github_token');
     
     if (!token) {
-        console.warn('GitHub token não configurado');
+        console.warn('⚠️ GitHub token não configurado');
         return null;
     }
     
+    // Detecta automaticamente owner e repo do repositório atual
     return new GitHubBlogPublisher({
-        owner: 'SEU-USUARIO-GITHUB',
-        repo: 'SEU-BLOG-REPO',
+        owner: 'mediagrowthmkt-debug',
+        repo: 'blog-template-md',
         token: token,
         branch: 'main'
     });
@@ -161,7 +163,54 @@ function initGitHubPublisher() {
  */
 function saveGitHubToken(token) {
     localStorage.setItem('github_token', token);
-    console.log('Token salvo com sucesso');
+    console.log('✅ Token salvo com sucesso');
+}
+
+/**
+ * Testar conexão com GitHub
+ */
+async function testGitHubConnection() {
+    const publisher = initGitHubPublisher();
+    
+    if (!publisher) {
+        throw new Error('Token não configurado');
+    }
+    
+    try {
+        // Testa fazendo uma requisição simples para verificar o repo
+        const url = `https://api.github.com/repos/${publisher.owner}/${publisher.repo}`;
+        
+        const response = await fetch(url, {
+            headers: publisher.getHeaders()
+        });
+        
+        if (!response.ok) {
+            if (response.status === 401) {
+                throw new Error('Token inválido ou expirado');
+            } else if (response.status === 404) {
+                throw new Error('Repositório não encontrado');
+            } else {
+                const error = await response.json();
+                throw new Error(error.message || `Erro ${response.status}`);
+            }
+        }
+        
+        const data = await response.json();
+        console.log('✅ Conexão estabelecida com sucesso!');
+        console.log('📦 Repositório:', data.full_name);
+        console.log('🔗 URL:', data.html_url);
+        
+        return {
+            success: true,
+            repo: data.full_name,
+            url: data.html_url,
+            permissions: data.permissions
+        };
+        
+    } catch (error) {
+        console.error('❌ Erro ao testar conexão:', error);
+        throw error;
+    }
 }
 
 /**
@@ -188,4 +237,5 @@ async function publishPost(slug, htmlContent) {
 window.GitHubBlogPublisher = GitHubBlogPublisher;
 window.initGitHubPublisher = initGitHubPublisher;
 window.saveGitHubToken = saveGitHubToken;
+window.testGitHubConnection = testGitHubConnection;
 window.publishPost = publishPost;

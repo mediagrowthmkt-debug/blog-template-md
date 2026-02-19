@@ -1892,22 +1892,11 @@ testTokenBtn?.addEventListener('click', async () => {
     tokenStatus.className = '';
     
     try {
-        const response = await fetch('https://api.github.com/repos/SEU-USUARIO-GITHUB/SEU-BLOG-REPO', {
-            headers: {
-                'Authorization': `token ${token}`,
-                'Accept': 'application/vnd.github.v3+json'
-            }
-        });
-        
-        if (response.ok) {
-            tokenStatus.textContent = '✅ Conexão bem-sucedida! Pronto para publicar.';
-            tokenStatus.className = 'success';
-        } else {
-            tokenStatus.textContent = '❌ Erro de autenticação. Verifique o token.';
-            tokenStatus.className = 'error';
-        }
+        const result = await window.testGitHubConnection();
+        tokenStatus.textContent = `✅ Conexão OK! Repositório: ${result.repo}`;
+        tokenStatus.className = 'success';
     } catch (error) {
-        tokenStatus.textContent = '❌ Erro de rede: ' + error.message;
+        tokenStatus.textContent = `❌ ${error.message}`;
         tokenStatus.className = 'error';
     }
 });
