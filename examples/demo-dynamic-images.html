@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exemplo: Imagens Dinâmicas no Blog</title>
+    <link rel="stylesheet" href="../assets/css/blog-post.css">
+    <style>
+        .demo-notice {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(235, 122, 61, 0.95);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 20px rgba(235, 122, 61, 0.4);
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-notice">🎨 Demo: Imagens Dinâmicas</div>
+
+    <!-- NAVIGATION -->
+    <nav class="main-navigation" aria-label="Main Navigation">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-link">← Voltar ao Formulário</a>
+            <a href="/posts" class="nav-link">Blog</a>
+        </div>
+    </nav>
+
+    <!-- ARTICLE CONTAINER -->
+    <article class="blog-post">
+        <!-- HEADER -->
+        <header class="post-header">
+            <div class="post-meta-top">
+                <span class="category-badge">Demo</span>
+                <span class="read-time">⏱️ 3 min de leitura</span>
+            </div>
+            
+            <h1 class="post-title">Demonstração: Imagens Dinâmicas ao Longo do Conteúdo</h1>
+            
+            <div class="post-meta">
+                <div class="author-info">
+                    <img src="https://via.placeholder.com/100" alt="Autor" class="author-avatar">
+                    <div>
+                        <span class="author-name">Equipe de Desenvolvimento</span>
+                        <time datetime="2026-02-19" class="publish-date">19 de fevereiro de 2026</time>
+                    </div>
+                </div>
+                <div class="post-actions">
+                    <button class="share-btn" aria-label="Compartilhar">🔗 Compartilhar</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- COVER IMAGE -->
+        <figure class="post-cover">
+            <img src="https://images.unsplash.com/photo-1556911220-bff31c812dba?w=1200" 
+                 alt="Cozinha moderna com design elegante" 
+                 width="1200" 
+                 height="630"
+                 loading="eager">
+            <figcaption>Imagem de capa em formato 16:9 panorâmico</figcaption>
+        </figure>
+
+        <!-- INTRODUCTION -->
+        <div class="post-intro">
+            Esta é uma demonstração de como as imagens internas funcionam ao longo do conteúdo. 
+            Repare como as imagens aparecem em diferentes posições e layouts, criando uma experiência 
+            de leitura mais dinâmica e visual.
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="post-content">
+            <h2>Introdução aos Layouts de Imagem</h2>
+            <p>Nosso sistema de blog agora suporta três tipos diferentes de layouts para imagens internas. 
+            Cada layout tem seu propósito específico e é aplicado automaticamente de forma alternada.</p>
+
+            <p>Vamos explorar cada um deles com exemplos práticos. Continue lendo para ver como cada 
+            layout funciona na prática.</p>
+
+            <!-- IMAGEM 1: IMAGE-LEFT -->
+            <figure class="internal-image image-left">
+                <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800" 
+                     alt="Interior de cozinha moderna com ilha central" 
+                     loading="lazy">
+                <figcaption>Layout image-left: imagem à esquerda</figcaption>
+            </figure>
+
+            <h3>1. Layout Image-Left (Imagem à Esquerda)</h3>
+            <p>Como você pode ver à esquerda, este layout permite que a imagem flutue no lado esquerdo 
+            da página, ocupando 45% da largura disponível. O texto flui naturalmente ao redor da imagem, 
+            criando uma composição harmoniosa.</p>
+
+            <p>Este layout é ideal para ilustrar pontos específicos do texto sem interromper completamente 
+            o fluxo de leitura. O leitor pode ver a imagem enquanto continua lendo o conteúdo.</p>
+
+            <p>Em dispositivos móveis, esta imagem automaticamente se expande para ocupar 100% da largura, 
+            garantindo boa visualização em telas pequenas.</p>
+
+            <h2>Explorando Outros Layouts</h2>
+            <p>Agora que você viu como funciona o layout à esquerda, vamos explorar o próximo: 
+            a imagem posicionada à direita.</p>
+
+            <!-- IMAGEM 2: IMAGE-RIGHT -->
+            <figure class="internal-image image-right">
+                <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800" 
+                     alt="Bancada de granito com acabamento premium" 
+                     loading="lazy">
+                <figcaption>Layout image-right: imagem à direita</figcaption>
+            </figure>
+
+            <h3>2. Layout Image-Right (Imagem à Direita)</h3>
+            <p>Agora a imagem aparece à direita, veja ao lado! Este layout também ocupa 45% da largura 
+            e permite que o texto flua ao seu redor, mas desta vez do lado esquerdo.</p>
+
+            <p>A alternância entre imagens à esquerda e à direita cria um ritmo visual interessante, 
+            tornando a leitura mais dinâmica e menos monótona. Isso mantém o leitor engajado.</p>
+
+            <p>Este é um dos segredos para criar posts de blog profissionais que parecem ter sido 
+            cuidadosamente projetados por um designer.</p>
+
+            <h2>Destaque Visual com Imagem em Largura Total</h2>
+            <p>Quando você precisa dar mais ênfase a uma imagem específica, o layout de largura total 
+            é a escolha perfeita. Veja o exemplo abaixo:</p>
+
+            <!-- IMAGEM 3: IMAGE-FULL -->
+            <figure class="internal-image image-full">
+                <img src="https://images.unsplash.com/photo-1556911220-bff31c812dba?w=1200" 
+                     alt="Cozinha completa com todos os detalhes visíveis" 
+                     loading="lazy">
+                <figcaption>Layout image-full: largura total em formato 16:9</figcaption>
+            </figure>
+
+            <h3>3. Layout Image-Full (Largura Total)</h3>
+            <p>Como você acabou de ver, a imagem acima ocupa toda a largura disponível do conteúdo. 
+            Este layout é perfeito para:</p>
+
+            <ul>
+                <li><strong>Imagens panorâmicas</strong> - Paisagens, ambientes amplos, vistas gerais</li>
+                <li><strong>Gráficos e infográficos</strong> - Que precisam de espaço para serem legíveis</li>
+                <li><strong>Momentos de impacto</strong> - Quando você quer que o leitor pare e preste atenção</li>
+                <li><strong>Separadores de seção</strong> - Para criar uma transição visual entre tópicos</li>
+            </ul>
+
+            <p>A imagem é exibida em proporção 16:9 (widescreen), que é o formato padrão para vídeos 
+            e telas modernas, garantindo uma apresentação profissional.</p>
+
+            <h2>Rotação Automática de Layouts</h2>
+            <p>O sistema alterna automaticamente entre os três layouts na seguinte ordem:</p>
+
+            <ol>
+                <li><strong>Primeira imagem:</strong> image-left (esquerda)</li>
+                <li><strong>Segunda imagem:</strong> image-right (direita)</li>
+                <li><strong>Terceira imagem:</strong> image-full (largura total)</li>
+                <li><strong>Quarta imagem:</strong> volta para image-left (reinicia o ciclo)</li>
+            </ol>
+
+            <p>Essa rotação cria um padrão visual agradável e profissional, sem que você precise 
+            configurar manualmente cada imagem.</p>
+
+            <!-- IMAGEM 4: Demonstra que o ciclo recomeça -->
+            <figure class="internal-image image-left">
+                <img src="https://images.unsplash.com/photo-1507089947368-19c1da9775ae?w=800" 
+                     alt="Detalhe de bancada em mármore" 
+                     loading="lazy">
+                <figcaption>Quarta imagem: ciclo recomeça com image-left</figcaption>
+            </figure>
+
+            <h3>Exemplo de Ciclo Contínuo</h3>
+            <p>Como você pode ver, a quarta imagem voltou para o layout image-left, recomeçando 
+            o ciclo. Isso garante variedade visual mesmo em posts com muitas imagens.</p>
+
+            <p>Você pode adicionar quantas imagens quiser - o sistema sempre manterá essa rotação 
+            harmoniosa de layouts.</p>
+
+            <h2>Responsividade e Mobile-First</h2>
+            <p>Um dos aspectos mais importantes do design moderno é a responsividade. Nosso sistema 
+            foi desenvolvido com abordagem mobile-first:</p>
+
+            <h3>Em Telas Desktop (> 768px)</h3>
+            <ul>
+                <li>Imagens left/right ocupam 45% da largura</li>
+                <li>Texto flui ao redor das imagens</li>
+                <li>Layout rico e dinâmico</li>
+            </ul>
+
+            <h3>Em Telas Mobile (< 768px)</h3>
+            <ul>
+                <li>Todas as imagens ocupam 100% da largura</li>
+                <li>Empilhadas verticalmente</li>
+                <li>Margens otimizadas para toque</li>
+                <li>Legibilidade máxima</li>
+            </ul>
+
+            <!-- IMAGEM 5: Mais um exemplo -->
+            <figure class="internal-image image-right">
+                <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800" 
+                     alt="Espaço gourmet com design moderno" 
+                     loading="lazy">
+                <figcaption>Quinta imagem: image-right novamente</figcaption>
+            </figure>
+
+            <h3>Teste Você Mesmo</h3>
+            <p>Para testar a responsividade desta página:</p>
+
+            <ol>
+                <li>Pressione <kbd>F12</kbd> para abrir as ferramentas de desenvolvedor</li>
+                <li>Clique no ícone de dispositivo móvel (ou pressione <kbd>Ctrl+Shift+M</kbd>)</li>
+                <li>Altere o tamanho da tela e veja como as imagens se adaptam</li>
+            </ol>
+
+            <p>Você verá que em telas menores, todas as imagens flutuantes (left/right) se transformam 
+            em imagens de largura total, garantindo uma experiência perfeita em smartphones e tablets.</p>
+
+            <h2>Performance e Otimização</h2>
+            <p>Além do visual atraente, nosso sistema também está otimizado para performance:</p>
+
+            <ul>
+                <li><strong>Lazy Loading:</strong> Imagens só carregam quando estão prestes a aparecer na tela</li>
+                <li><strong>Proporções Definidas:</strong> Evita layout shift durante o carregamento</li>
+                <li><strong>Transições GPU:</strong> Animações suaves usando aceleração de hardware</li>
+                <li><strong>Shadow Otimizado:</strong> Efeitos visuais sem impacto na performance</li>
+            </ul>
+
+            <p>Tudo isso resulta em um blog rápido, responsivo e visualmente impressionante.</p>
+        </div>
+
+        <!-- CONCLUSION -->
+        <div class="post-conclusion">
+            <strong>Conclusão:</strong> O sistema de imagens dinâmicas transforma completamente a experiência 
+            de leitura do seu blog. As imagens aparecem naturalmente ao longo do conteúdo, criando um fluxo 
+            visual harmônico que mantém os leitores engajados. E o melhor: tudo acontece automaticamente!
+        </div>
+
+        <!-- TAGS -->
+        <footer class="post-footer">
+            <div class="tags">
+                <strong>Tags:</strong>
+                <a href="#" class="tag">#design</a>
+                <a href="#" class="tag">#blog</a>
+                <a href="#" class="tag">#imagens</a>
+                <a href="#" class="tag">#responsivo</a>
+                <a href="#" class="tag">#tutorial</a>
+            </div>
+            
+            <!-- CTA -->
+            <div class="post-cta">
+                <h3>Pronto para Criar Seu Próprio Post?</h3>
+                <p>Use nosso formulário para criar posts incríveis com imagens dinâmicas em minutos!</p>
+                <a href="../index.html" class="cta-button">Criar Meu Post Agora</a>
+            </div>
+        </footer>
+    </article>
+
+    <!-- BACK TO TOP -->
+    <button id="backToTop" class="back-to-top" aria-label="Voltar ao topo">↑</button>
+
+    <!-- SCRIPTS -->
+    <script src="../assets/js/blog-post.js"></script>
+</body>
+</html>

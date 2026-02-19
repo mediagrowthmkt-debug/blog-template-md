@@ -735,30 +735,94 @@ function showPreview() {
     
     // Debug: mostra quantas imagens internas foram coletadas
     console.log('📸 Imagens Internas no Preview:', formData.internalImages);
-    console.log('🔗 URLs convertidas:', formData.internalImages.map(img => img.url));
+    console.log('🔗 URLs das imagens:', formData.internalImages?.map(img => img.url) || []);
+    console.log('📦 Total de imagens:', formData.internalImages?.length || 0);
     
     const previewHtml = generateFullPreviewPage(formData);
     
     // Open preview in new window
     const previewWindow = window.open('', '_blank');
+    if (!previewWindow) {
+        alert('⚠️ Bloqueador de pop-up detectado! Por favor, permita pop-ups para este site.');
+        return;
+    }
     previewWindow.document.open();
     previewWindow.document.write(previewHtml);
     previewWindow.document.close();
 }
 
 function generateFullPreviewPage(data) {
-    // Gera HTML das imagens internas
-    const internalImagesHtml = data.internalImages && data.internalImages.length > 0 
-        ? `<div class="internal-images" style="margin: 30px 0;">
-            <h3 style="margin-bottom: 20px;">📸 Imagens Internas:</h3>
-            ${data.internalImages.map(img => `
-                <figure style="margin: 20px 0;">
-                    <img src="${img.url}" alt="${img.alt}" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                    ${img.alt ? `<figcaption style="margin-top: 8px; font-size: 14px; color: #666; font-style: italic;">${img.alt}</figcaption>` : ''}
-                </figure>
-            `).join('')}
-           </div>`
-        : '';
+    // Debug de imagens
+    console.log('🎨 Gerando preview com dados:', {
+        totalImagens: data.internalImages?.length || 0,
+        imagens: data.internalImages
+    });
+    
+    // Processa o conteúdo e distribui as imagens ao longo dele
+    let contentWithImages = data.contentBody || '<p>Conteúdo do post será exibido aqui...</p>';
+    
+    if (data.internalImages && data.internalImages.length > 0) {
+        const validImages = data.internalImages.filter(img => img.url && img.url.trim() !== '');
+        
+        if (validImages.length > 0) {
+            console.log(`🎨 Distribuindo ${validImages.length} imagens ao longo do conteúdo`);
+            
+            // Divide o conteúdo em elementos HTML (h2, h3, p, ul, etc)
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = contentWithImages;
+            const elements = Array.from(tempDiv.children);
+            
+            // Layouts variados para aplicar dinamicamente
+            const layouts = ['image-left', 'image-right', 'image-full'];
+            
+            // Distribui as imagens estrategicamente
+            if (elements.length > 0) {
+                const insertInterval = Math.max(2, Math.floor(elements.length / validImages.length));
+                
+                validImages.forEach((img, index) => {
+                    const insertPosition = Math.min((index + 1) * insertInterval, elements.length - 1);
+                    const layout = layouts[index % layouts.length];
+                    
+                    // Cria o elemento de imagem com layout responsivo
+                    const imageHTML = `
+                        <figure class="dynamic-image ${layout}" style="margin: 30px 0; overflow: visible; clear: both;">
+                            <img src="${img.url}" 
+                                 alt="${img.alt || 'Imagem ' + (index + 1)}" 
+                                 class="${layout}"
+                                 style="border-radius: 12px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3); transition: transform 0.3s ease;"
+                                 onerror="this.style.border='2px dashed rgba(235, 122, 61, 0.5)'; this.alt='❌ Erro ao carregar'"
+                                 onload="console.log('✅ Imagem ${index + 1} carregada')">
+                            ${img.alt ? `<figcaption style="margin-top: 12px; font-size: 0.9rem; color: rgba(255,255,255,0.6); font-style: italic;">${img.alt}</figcaption>` : ''}
+                        </figure>
+                    `;
+                    
+                    // Insere a imagem após o elemento escolhido
+                    if (elements[insertPosition]) {
+                        elements[insertPosition].insertAdjacentHTML('afterend', imageHTML);
+                    }
+                });
+                
+                // Reconstrói o conteúdo com as imagens inseridas
+                contentWithImages = tempDiv.innerHTML;
+                console.log(`✅ ${validImages.length} imagens distribuídas ao longo do conteúdo`);
+            } else {
+                // Fallback: adiciona as imagens no final
+                const imagesHTML = validImages.map((img, index) => `
+                    <figure style="margin: 30px 0; overflow: hidden; border-radius: 12px;">
+                        <img src="${img.url}" 
+                             alt="${img.alt || 'Imagem ' + (index + 1)}" 
+                             style="width: 100%; height: auto; border-radius: 12px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);">
+                        ${img.alt ? `<figcaption style="margin-top: 12px; font-size: 0.9rem; color: rgba(255,255,255,0.6); font-style: italic; text-align: center;">${img.alt}</figcaption>` : ''}
+                    </figure>
+                `).join('');
+                contentWithImages += imagesHTML;
+            }
+        } else {
+            console.log('⚠️ Nenhuma imagem válida encontrada (URLs vazias)');
+        }
+    } else {
+        console.log('⚠️ Nenhuma imagem interna fornecida');
+    }
     
     return `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -823,6 +887,10 @@ function generateFullPreviewPage(data) {
         }
         .cover-image {
             width: 100%;
+            height: auto;
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+            object-position: center;
             border-radius: 16px;
             margin: 30px 0;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
@@ -835,13 +903,114 @@ function generateFullPreviewPage(data) {
         .content p {
             margin-bottom: 20px;
         }
+        .content h2 {
+            font-family: 'Mazzard H', sans-serif;
+            font-size: 2rem;
+            color: #EB7A3D;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            clear: both;
+        }
+        .content h3 {
+            font-size: 1.5rem;
+            color: #fff;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            clear: both;
+        }
+        .content ul, .content ol {
+            margin-left: 30px;
+            margin-bottom: 20px;
+        }
+        .content li {
+            margin-bottom: 10px;
+        }
+        
+        /* Layouts de Imagens Dinâmicos */
+        .main-content {
+            overflow: auto;
+        }
+        
+        .dynamic-image.image-left {
+            float: left;
+            max-width: 45%;
+            margin: 15px 30px 15px 0;
+        }
+        
+        .dynamic-image.image-right {
+            float: right;
+            max-width: 45%;
+            margin: 15px 0 15px 30px;
+        }
+        
+        .dynamic-image.image-full {
+            width: 100%;
+            max-width: 100%;
+            margin: 30px 0;
+            clear: both;
+        }
+        
+        .dynamic-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .dynamic-image.image-full img {
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+        }
+        
+        .dynamic-image img:hover {
+            transform: scale(1.02);
+        }
+        
+        .dynamic-image figcaption {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-style: italic;
+        }
+        
+        /* Clearfix para floats */
+        .content::after,
+        .main-content::after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+        
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .dynamic-image.image-left,
+            .dynamic-image.image-right {
+                float: none;
+                max-width: 100%;
+                margin: 20px 0;
+            }
+            
+            .preview-container {
+                padding: 30px 20px;
+            }
+        }
+        
         .internal-images figure {
             margin: 30px 0;
+            overflow: hidden;
+            border-radius: 12px;
         }
         .internal-images img {
             width: 100%;
+            height: auto;
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+            object-position: center;
             border-radius: 12px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+        .internal-images img:hover {
+            transform: scale(1.02);
         }
         .internal-images figcaption {
             margin-top: 12px;
@@ -902,9 +1071,7 @@ function generateFullPreviewPage(data) {
         <div class="content">
             ${data.introduction ? `<div class="introduction" style="font-size: 1.2rem; font-weight: 500; margin-bottom: 30px; padding-left: 20px; border-left: 4px solid #EB7A3D;">${data.introduction.replace(/\n/g, '<br>')}</div>` : ''}
             
-            ${data.contentBody ? `<div class="main-content">${data.contentBody.replace(/\n/g, '<br>')}</div>` : '<p>Conteúdo do post será exibido aqui...</p>'}
-            
-            ${internalImagesHtml}
+            <div class="main-content">${contentWithImages}</div>
             
             ${data.conclusion ? `<div class="conclusion" style="margin-top: 40px; padding: 20px; background: rgba(255,255,255,0.03); border-radius: 12px;">${data.conclusion.replace(/\n/g, '<br>')}</div>` : ''}
         </div>
@@ -1147,35 +1314,40 @@ function collectFormData() {
     const internalImageUrls = formData.getAll('internalImageUrl[]');
     const internalImageAlts = formData.getAll('internalImageAlt[]');
     
-    console.log('🔍 Debug - URLs coletadas:', internalImageUrls);
-    console.log('🔍 Debug - Alts coletados:', internalImageAlts);
+    console.log('🔍 Debug - Coletando imagens do formulário:');
+    console.log('  - URLs encontradas:', internalImageUrls.length);
+    console.log('  - Alts encontrados:', internalImageAlts.length);
+    console.log('  - URLs raw:', internalImageUrls);
     
     for (let i = 0; i < internalImageUrls.length; i++) {
         const rawUrl = internalImageUrls[i];
         const url = rawUrl ? rawUrl.trim() : '';
         
-        console.log(`🔍 Imagem ${i+1}:`, {
+        console.log(`  � Processando imagem ${i+1}/${internalImageUrls.length}:`, {
+            index: i,
             rawUrl: rawUrl,
-            rawUrlType: typeof rawUrl,
-            rawUrlValue: JSON.stringify(rawUrl),
-            trimmedUrl: url,
-            length: url.length,
-            isEmpty: !url || url.length === 0
+            urlTrimmed: url,
+            urlLength: url.length,
+            isEmpty: !url || url.length === 0,
+            isPlaceholder: url.includes('[URL') || url.includes('URL]')
         });
         
-        if (url && url.length > 0) {
+        // Aceita URLs válidas (não vazias e não placeholders)
+        if (url && url.length > 0 && !url.includes('[URL') && !url.includes('URL]')) {
             const convertedUrl = convertGoogleDriveUrl(url);
-            internalImages.push({
+            const imgObj = {
                 url: convertedUrl,
-                alt: internalImageAlts[i] || ''
-            });
-            console.log(`✅ Imagem ${i+1} adicionada:`, convertedUrl);
+                alt: internalImageAlts[i] || `Imagem ${i+1}`
+            };
+            internalImages.push(imgObj);
+            console.log(`  ✅ Imagem ${i+1} adicionada:`, imgObj);
         } else {
-            console.log(`⚠️ Imagem ${i+1} ignorada (vazia ou inválida)`);
+            console.log(`  ⚠️ Imagem ${i+1} ignorada (vazia, inválida ou placeholder)`);
         }
     }
     
     console.log('📦 Total de imagens internas processadas:', internalImages.length);
+    console.log('📸 Array final de imagens:', internalImages);
     
     const internalLinks = [];
     const internalLinkUrls = formData.getAll('internalLinkUrl[]');
@@ -1345,8 +1517,67 @@ async function generatePostHtml(data) {
             .replace(/data:text\/html/gi, '');
     };
     
+    // Processa o conteúdo e distribui as imagens ao longo dele
+    let processedContentBody = sanitizeHtmlContent(data.contentBody);
+    
+    if (data.internalImages && data.internalImages.length > 0) {
+        const validImages = data.internalImages.filter(img => img.url && img.url.trim() !== '');
+        
+        if (validImages.length > 0) {
+            console.log(`🎨 Distribuindo ${validImages.length} imagens ao longo do conteúdo HTML final`);
+            
+            // Divide o conteúdo em elementos HTML
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = processedContentBody;
+            const elements = Array.from(tempDiv.children);
+            
+            // Layouts variados para aplicar dinamicamente
+            const layouts = ['image-left', 'image-right', 'image-full'];
+            
+            if (elements.length > 0) {
+                const insertInterval = Math.max(2, Math.floor(elements.length / validImages.length));
+                
+                validImages.forEach((img, index) => {
+                    const insertPosition = Math.min((index + 1) * insertInterval, elements.length - 1);
+                    const layout = layouts[index % layouts.length];
+                    
+                    // Cria o elemento de imagem com layout responsivo
+                    const imageHTML = `
+                        <figure class="internal-image ${layout}">
+                            <img src="${sanitizeUrl(img.url)}" 
+                                 alt="${escapeHtml(img.alt || 'Imagem ' + (index + 1))}" 
+                                 class="${layout}"
+                                 loading="lazy">
+                            ${img.alt ? `<figcaption>${escapeHtml(img.alt)}</figcaption>` : ''}
+                        </figure>
+                    `;
+                    
+                    // Insere a imagem após o elemento escolhido
+                    if (elements[insertPosition]) {
+                        elements[insertPosition].insertAdjacentHTML('afterend', imageHTML);
+                    }
+                });
+                
+                // Reconstrói o conteúdo com as imagens inseridas
+                processedContentBody = tempDiv.innerHTML;
+                console.log(`✅ ${validImages.length} imagens distribuídas ao longo do conteúdo HTML`);
+            } else {
+                // Fallback: adiciona as imagens no final
+                const imagesHTML = validImages.map((img, index) => `
+                    <figure class="internal-image image-full">
+                        <img src="${sanitizeUrl(img.url)}" 
+                             alt="${escapeHtml(img.alt || 'Imagem ' + (index + 1))}" 
+                             loading="lazy">
+                        ${img.alt ? `<figcaption>${escapeHtml(img.alt)}</figcaption>` : ''}
+                    </figure>
+                `).join('');
+                processedContentBody += imagesHTML;
+            }
+        }
+    }
+    
     template = template.replace(/{{INTRODUCTION}}/g, sanitizeHtmlContent(data.introduction));
-    template = template.replace(/{{CONTENT_BODY}}/g, sanitizeHtmlContent(data.contentBody));
+    template = template.replace(/{{CONTENT_BODY}}/g, processedContentBody);
     template = template.replace(/{{CONCLUSION}}/g, sanitizeHtmlContent(data.conclusion));
     
     // Tags HTML
@@ -1678,6 +1909,515 @@ testTokenBtn?.addEventListener('click', async () => {
     } catch (error) {
         tokenStatus.textContent = '❌ Erro de rede: ' + error.message;
         tokenStatus.className = 'error';
+    }
+});
+
+// ======================
+// AUTO-FILL FUNCTIONALITY
+// ======================
+
+document.addEventListener('DOMContentLoaded', function() {
+    const autoFillBtn = document.getElementById('autoFillBtn');
+    const clearAutofillBtn = document.getElementById('clearAutofillBtn');
+    const aiAutofillText = document.getElementById('aiAutofillText');
+    const autofillStatus = document.getElementById('autofillStatus');
+
+    // Mapeamento de campos (suporta português e inglês)
+    const fieldMapping = {
+        // BLOCK 1
+        'title principal|título principal|h1': 'h1Title',
+        'slug|url amigável': 'slug',
+        'category|categoria': 'category',
+        'author|autor': 'author',
+        'avatar do autor': 'authorAvatar',
+        'data de publicação|date published': 'datePublished',
+        'tempo de leitura': 'readTime',
+        
+        // BLOCK 2
+        'palavra-chave principal|primary keyword': 'primaryKeyword',
+        'palavras-chave secundárias|secondary keywords': 'secondaryKeywords',
+        'meta title': 'metaTitle',
+        'meta description': 'metaDescription',
+        'intenção de busca|search intent': 'searchIntent',
+        
+        // BLOCK 3
+        'url da imagem de capa|cover image url': 'coverImage',
+        'alt text da imagem principal|cover image alt': 'coverImageAlt',
+        'legenda da imagem|image caption': 'coverImageCaption',
+        
+        // BLOCK 4
+        'introdução|introduction': 'introduction',
+        'conteúdo principal|main content': 'contentBody',
+        'conclusão|conclusion': 'conclusion',
+        
+        // BLOCK 6
+        'tags do post|post tags': 'tags',
+        'posts relacionados|related posts': 'relatedPosts',
+        
+        // BLOCK 7
+        'título do formulário|form title': 'formTitle',
+        'subtítulo|descrição do formulário|form subtitle': 'formSubtitle',
+        'texto do botão|button text': 'formButtonText',
+        'webhook url': 'webhookUrl',
+        'nome da campanha|campaign name': 'campaignName',
+        'pergunta qualificatória|qualifying question': 'qualifiedQuestion',
+        
+        // BLOCK 8
+        'url base do site|site url': 'siteUrl',
+        'url do logo': 'siteLogo'
+    };
+
+    // =========================================================================
+    // 🔒 FUNÇÃO CRÍTICA: Auto-Preenchimento de Formulário
+    // =========================================================================
+    // ⚠️ ATENÇÃO: Esta função contém lógica crítica para coleta de HTML
+    // 
+    // ANTES DE MODIFICAR, LEIA: docs/updates/HTML-CONTENT-COLLECTION-PROTECTION.md
+    //
+    // Principais funcionalidades:
+    // 1. Pré-processamento de HTML inline (quebra tags em linhas separadas)
+    // 2. Coleta completa de conteúdo HTML (não para até "Conclusão:")
+    // 3. Preenchimento automático de todos os campos do formulário
+    // 4. Validação e logs detalhados
+    //
+    // ⚠️ NÃO MODIFICAR as seguintes seções sem testar completamente:
+    //    - Flag isCollectingHTML
+    //    - Detecção de início de HTML (hasHTML && !isCollectingHTML)
+    //    - Continuação de coleta (hasHTML && isCollectingHTML)
+    //    - Detecção de fim (isConclusionField)
+    //    - Adição de linhas durante coleta
+    //
+    // Última modificação: 19/02/2026
+    // Status: ✅ Testado e funcionando
+    // =========================================================================
+    
+    autoFillBtn?.addEventListener('click', function() {
+        const text = aiAutofillText.value.trim();
+        
+        if (!text) {
+            showStatus('Por favor, cole o texto formatado antes de preencher.', 'error');
+            return;
+        }
+
+        try {
+            let lines = text.split('\n');
+            
+            // PRÉ-PROCESSAMENTO: Quebra HTML em linhas separadas
+            console.log('🔧 Pré-processando HTML...');
+            lines = lines.map(line => {
+                // Verifica se a linha tem HTML inline (múltiplas tags em uma linha)
+                if (/<(h[1-6]|p|ul|ol|li|div|strong|em)\b[^>]*>/i.test(line)) {
+                    // Quebra tags em linhas separadas
+                    let formattedLine = line
+                        // Quebra antes de tags de abertura
+                        .replace(/(<h[1-6][^>]*>)/gi, '\n$1')
+                        .replace(/(<p[^>]*>)/gi, '\n$1')
+                        .replace(/(<ul[^>]*>)/gi, '\n$1')
+                        .replace(/(<ol[^>]*>)/gi, '\n$1')
+                        .replace(/(<li[^>]*>)/gi, '\n$1')
+                        // Quebra após tags de fechamento
+                        .replace(/(<\/h[1-6]>)/gi, '$1\n')
+                        .replace(/(<\/p>)/gi, '$1\n')
+                        .replace(/(<\/ul>)/gi, '$1\n')
+                        .replace(/(<\/ol>)/gi, '$1\n')
+                        .replace(/(<\/li>)/gi, '$1\n');
+                    
+                    // Retorna array de linhas
+                    return formattedLine.split('\n').filter(l => l.trim());
+                }
+                return line;
+            }).flat(); // Achata arrays aninhados
+            
+            console.log('✅ HTML formatado! Linhas antes:', text.split('\n').length, '| depois:', lines.length);
+            
+            let fieldsCount = 0;
+            let currentField = '';
+            let currentValue = '';
+            let internalImages = [];
+            let internalLinks = [];
+            let externalLinks = [];
+            
+            // ⚠️ CRITICAL: Flag para controle de coleta de HTML
+            // Esta flag garante que TODO o conteúdo HTML seja capturado
+            // NÃO MODIFICAR esta lógica sem testar completamente
+            let isCollectingHTML = false;
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                
+                // ====================================================================
+                // STEP 1: Pular linhas vazias e separadores FORA da coleta de HTML
+                // ====================================================================
+                if (!isCollectingHTML && (!line || line.startsWith('=') || line.startsWith('🧱') || line.startsWith('🧠') || 
+                    line.startsWith('🖼️') || line.startsWith('✍️') || line.startsWith('🔗') || 
+                    line.startsWith('🏷️') || line.startsWith('🚀') || line.startsWith('⚙️'))) {
+                    continue;
+                }
+                
+                // DEBUG: Log de linhas processadas durante coleta de HTML
+                if (isCollectingHTML) {
+                    console.log(`📄 Linha ${i}: ${line.substring(0, 60)}${line.length > 60 ? '...' : ''}`);
+                }
+
+                // ====================================================================
+                // STEP 2: Detectar início de HTML (tags <h2>, <p>, <ul>, etc)
+                // ====================================================================
+                const hasHTML = /<(h[1-6]|p|ul|ol|li|div|span|strong|em|a)\b[^>]*>/i.test(line);
+                
+                // ⚠️ CRITICAL: Iniciar coleta quando encontrar primeira tag HTML
+                // Não modificar esta condição sem entender o fluxo completo
+                if (hasHTML && !isCollectingHTML) {
+                    currentField = 'conteúdo principal';
+                    currentValue = line; // Primeira linha do HTML
+                    isCollectingHTML = true;
+                    console.log('🎨 HTML detectado na linha', i + '! Iniciando coleta de Conteúdo Principal...');
+                    console.log('📝 Primeira linha:', line.substring(0, 80));
+                    continue;
+                }
+                
+                // ⚠️ CRITICAL: Adicionar linhas HTML subsequentes
+                // Se já está coletando e encontra mais HTML, SEMPRE adiciona
+                if (hasHTML && isCollectingHTML) {
+                    currentValue += '\n' + line;
+                    console.log('➕ HTML linha:', line.substring(0, 50) + '...');
+                    continue;
+                }
+                
+                // ====================================================================
+                // STEP 3: Processar linhas DURANTE coleta de HTML
+                // ====================================================================
+                if (isCollectingHTML) {
+                    // ⚠️ CRITICAL: Detectar fim do conteúdo HTML
+                    // Só para quando encontrar "Conclusão:" ou "Conclusion:"
+                    const lowerLine = line.toLowerCase();
+                    const isConclusionField = (lowerLine.startsWith('conclus') || lowerLine.startsWith('conclusion')) && line.includes(':');
+                    
+                    if (isConclusionField) {
+                        // Salvar TODO o conteúdo HTML coletado
+                        if (currentField && currentValue) {
+                            setFieldValue(currentField, currentValue, fieldMapping);
+                            fieldsCount++;
+                            console.log('✅ Conteúdo HTML completo salvo! Total de linhas:', currentValue.split('\n').length);
+                            console.log('📦 Primeiros 200 chars:', currentValue.substring(0, 200) + '...');
+                        }
+                        isCollectingHTML = false;
+                        
+                        // Processar o campo "Conclusão"
+                        const parts = line.split(':');
+                        currentField = parts[0].trim().toLowerCase();
+                        currentValue = parts.slice(1).join(':').trim();
+                        continue;
+                    }
+                    
+                    // ⚠️ CRITICAL: Adicionar TODAS as linhas durante coleta
+                    // Isso inclui: texto puro, linhas vazias, etc.
+                    // Necessário para preservar a formatação HTML completa
+                    currentValue += '\n' + line;
+                    console.log('📝 Texto linha:', line.substring(0, 50) + '...');
+                    continue;
+                }
+
+                // ====================================================================
+                // STEP 4: Processar campos normais (fora de coleta de HTML)
+                // ====================================================================
+                if (line.includes(':') && !isCollectingHTML) {
+                    // Salvar campo anterior se existir
+                    if (currentField && currentValue) {
+                        setFieldValue(currentField, currentValue, fieldMapping);
+                        fieldsCount++;
+                    }
+
+                    // Extrair novo campo
+                    const parts = line.split(':');
+                    const fieldName = parts[0].trim().toLowerCase();
+                    const fieldValue = parts.slice(1).join(':').trim();
+
+                    // Detectar se é campo "Conteúdo Principal" com texto adicional
+                    // Ex: "Conteúdo Principal [SEMPRE use HTML formatado: <h2>, <h3>, <p>, <ul>, <li>]:"
+                    if (fieldName.includes('conteúdo principal') || fieldName.includes('main content')) {
+                        currentField = 'conteúdo principal';
+                        currentValue = fieldValue || '';
+                        isCollectingHTML = true; // Ativa modo de coleta de HTML
+                        console.log('📝 Campo "Conteúdo Principal" detectado! Aguardando HTML...');
+                        continue;
+                    }
+
+                    // Tratamento especial para imagens internas
+                    if (fieldName.includes('imagem interna') || fieldName.includes('internal image')) {
+                        const imgMatch = fieldName.match(/\d+/);
+                        const imgIndex = imgMatch ? parseInt(imgMatch[0]) - 1 : 0;
+                        
+                        if (fieldName.includes('url')) {
+                            if (!internalImages[imgIndex]) internalImages[imgIndex] = {};
+                            internalImages[imgIndex].url = fieldValue;
+                        } else if (fieldName.includes('alt')) {
+                            if (!internalImages[imgIndex]) internalImages[imgIndex] = {};
+                            internalImages[imgIndex].alt = fieldValue;
+                        }
+                        currentField = '';
+                        currentValue = '';
+                        continue;
+                    }
+
+                    // Tratamento especial para links internos
+                    if (fieldName.includes('link interno') || fieldName.includes('internal link')) {
+                        const linkMatch = fieldName.match(/\d+/);
+                        const linkIndex = linkMatch ? parseInt(linkMatch[0]) - 1 : 0;
+                        
+                        if (fieldName.includes('url')) {
+                            if (!internalLinks[linkIndex]) internalLinks[linkIndex] = {};
+                            internalLinks[linkIndex].url = fieldValue;
+                        } else if (fieldName.includes('texto âncora') || fieldName.includes('anchor')) {
+                            if (!internalLinks[linkIndex]) internalLinks[linkIndex] = {};
+                            internalLinks[linkIndex].anchor = fieldValue;
+                        }
+                        currentField = '';
+                        currentValue = '';
+                        continue;
+                    }
+
+                    // Tratamento especial para links externos
+                    if (fieldName.includes('link externo') || fieldName.includes('external link')) {
+                        const linkMatch = fieldName.match(/\d+/);
+                        const linkIndex = linkMatch ? parseInt(linkMatch[0]) - 1 : 0;
+                        
+                        if (fieldName.includes('url')) {
+                            if (!externalLinks[linkIndex]) externalLinks[linkIndex] = {};
+                            externalLinks[linkIndex].url = fieldValue;
+                        } else if (fieldName.includes('texto âncora') || fieldName.includes('anchor')) {
+                            if (!externalLinks[linkIndex]) externalLinks[linkIndex] = {};
+                            externalLinks[linkIndex].anchor = fieldValue;
+                        }
+                        currentField = '';
+                        currentValue = '';
+                        continue;
+                    }
+
+                    // Checkboxes especiais
+                    if (fieldName.includes('coletar nome') || fieldName.includes('collect name')) {
+                        document.getElementById('formCollectName').checked = !line.includes('☐');
+                        currentField = '';
+                        currentValue = '';
+                        continue;
+                    }
+                    if (fieldName.includes('coletar e-mail') || fieldName.includes('collect email')) {
+                        document.getElementById('formCollectEmail').checked = !line.includes('☐');
+                        currentField = '';
+                        currentValue = '';
+                        continue;
+                    }
+                    if (fieldName.includes('coletar telefone') || fieldName.includes('collect phone')) {
+                        document.getElementById('formCollectPhone').checked = !line.includes('☐');
+                        currentField = '';
+                        currentValue = '';
+                        continue;
+                    }
+                    if (fieldName.includes('habilitar comentários') || fieldName.includes('enable comments')) {
+                        document.getElementById('enableComments').checked = fieldValue.toLowerCase().includes('yes') || fieldValue.toLowerCase().includes('sim');
+                        currentField = '';
+                        currentValue = '';
+                        continue;
+                    }
+                    if (fieldName.includes('habilitar botões') || fieldName.includes('enable share')) {
+                        document.getElementById('enableShare').checked = fieldValue.toLowerCase().includes('yes') || fieldValue.toLowerCase().includes('sim');
+                        currentField = '';
+                        currentValue = '';
+                        continue;
+                    }
+
+                    currentField = fieldName;
+                    currentValue = fieldValue;
+                } else if (currentField || isCollectingHTML) {
+                    // Continuar valor do campo anterior (multi-linha ou HTML)
+                    if (isCollectingHTML) {
+                        // Durante coleta de HTML, preservar linhas vazias e formatação
+                        currentValue += '\n' + line;
+                    } else if (currentField) {
+                        // Para campos normais, continuar concatenando
+                        currentValue += '\n' + line;
+                    }
+                }
+            }
+
+            // ====================================================================
+            // STEP 5: Salvar último campo (proteção final)
+            // ====================================================================
+            // ⚠️ CRITICAL: Garantir que o último campo seja salvo
+            // Isso é essencial se o HTML não terminar com "Conclusão:"
+            if (currentField && currentValue) {
+                setFieldValue(currentField, currentValue, fieldMapping);
+                fieldsCount++;
+                if (isCollectingHTML) {
+                    console.log('⚠️ HTML salvo no final (não encontrou "Conclusão:")');
+                    console.log('📦 Total de caracteres:', currentValue.length);
+                }
+            }
+
+            // ====================================================================
+            // STEP 6: Validação de Conteúdo HTML
+            // ====================================================================
+            // Verificar se o campo "Conteúdo Principal" foi preenchido corretamente
+            const contentBodyField = document.getElementById('contentBody');
+            if (contentBodyField && contentBodyField.value) {
+                const contentLength = contentBodyField.value.length;
+                const hasHTMLTags = /<(h[2-3]|p|ul|ol|li)>/i.test(contentBodyField.value);
+                
+                if (contentLength < 100) {
+                    console.warn('⚠️ ATENÇÃO: Conteúdo Principal parece muito curto!');
+                    console.warn('📏 Tamanho:', contentLength, 'caracteres');
+                }
+                
+                if (!hasHTMLTags) {
+                    console.warn('⚠️ ATENÇÃO: Conteúdo Principal não contém tags HTML esperadas!');
+                }
+                
+                console.log('✅ Conteúdo Principal validado:', {
+                    tamanho: contentLength,
+                    temHTML: hasHTMLTags,
+                    linhas: contentBodyField.value.split('\n').length
+                });
+            }
+
+            // ====================================================================
+            // STEP 7: Adicionar imagens, links e outros campos
+            // ====================================================================
+            // Adicionar imagens internas
+            if (internalImages.length > 0) {
+                const container = document.getElementById('internalImagesContainer');
+                container.innerHTML = '';
+                internalImages.forEach(img => {
+                    if (img.url || img.alt) {
+                        addInternalImageField(img.url || '', img.alt || '');
+                        fieldsCount++;
+                    }
+                });
+            }
+
+            // Adicionar links internos
+            if (internalLinks.length > 0) {
+                const container = document.getElementById('internalLinksContainer');
+                container.innerHTML = '';
+                internalLinks.forEach(link => {
+                    if (link.url || link.anchor) {
+                        addInternalLinkField(link.url || '', link.anchor || '');
+                        fieldsCount++;
+                    }
+                });
+            }
+
+            // Adicionar links externos
+            if (externalLinks.length > 0) {
+                const container = document.getElementById('externalLinksContainer');
+                container.innerHTML = '';
+                externalLinks.forEach(link => {
+                    if (link.url || link.anchor) {
+                        addExternalLinkField(link.url || '', link.anchor || '');
+                        fieldsCount++;
+                    }
+                });
+            }
+
+            showStatus(`✅ ${fieldsCount} campos preenchidos com sucesso! Revise os dados e clique em "Gerar Post".`, 'success');
+            
+            // Scroll suave para o primeiro campo preenchido
+            document.getElementById('h1Title')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        } catch (error) {
+            console.error('Erro ao preencher campos:', error);
+            showStatus('❌ Erro ao processar o texto. Verifique o formato e tente novamente.', 'error');
+        }
+    });
+
+    clearAutofillBtn?.addEventListener('click', function() {
+        aiAutofillText.value = '';
+        showStatus('🗑️ Texto limpo. Cole um novo texto formatado.', 'info');
+    });
+
+    function setFieldValue(fieldName, value, mapping) {
+        // Detectar se o valor contém HTML
+        const hasHTML = /<(h[1-6]|p|ul|ol|li|div|span|strong|em|a)\b[^>]*>/i.test(value);
+        
+        // Para conteúdo HTML, não limpar os colchetes (pode ser código)
+        if (!hasHTML) {
+            value = value.replace(/\[.*?\]/g, '').trim();
+        } else {
+            value = value.trim();
+            console.log('🎨 Detectado HTML no valor, preservando formatação');
+        }
+        
+        if (!value || value === '(opcional)' || value === 'optional') return;
+
+        // Encontrar campo correspondente
+        for (const [key, id] of Object.entries(mapping)) {
+            const keywords = key.split('|');
+            if (keywords.some(keyword => fieldName.includes(keyword))) {
+                const element = document.getElementById(id);
+                if (element) {
+                    if (element.type === 'checkbox') {
+                        element.checked = value.toLowerCase().includes('yes') || value.toLowerCase().includes('sim');
+                    } else {
+                        element.value = value;
+                        // Trigger eventos para atualizar contadores
+                        element.dispatchEvent(new Event('input'));
+                        
+                        // Log especial para campos HTML
+                        if (hasHTML) {
+                            console.log(`✅ Campo "${id}" preenchido com HTML (${value.split('\n').length} linhas)`);
+                        }
+                    }
+                }
+                return;
+            }
+        }
+    }
+
+    function addInternalImageField(url, alt) {
+        const container = document.getElementById('internalImagesContainer');
+        const div = document.createElement('div');
+        div.className = 'internal-image-item';
+        div.innerHTML = `
+            <input type="url" name="internalImageUrl[]" value="${url}" placeholder="URL da imagem">
+            <input type="text" name="internalImageAlt[]" value="${alt}" placeholder="Alt text descritivo">
+            <button type="button" class="btn-remove" onclick="this.parentElement.remove()">✕</button>
+        `;
+        container.appendChild(div);
+    }
+
+    function addInternalLinkField(url, anchor) {
+        const container = document.getElementById('internalLinksContainer');
+        const div = document.createElement('div');
+        div.className = 'link-item';
+        div.innerHTML = `
+            <input type="url" name="internalLinkUrl[]" value="${url}" placeholder="URL interna">
+            <input type="text" name="internalLinkAnchor[]" value="${anchor}" placeholder="Texto âncora">
+            <button type="button" class="btn-remove" onclick="this.parentElement.remove()">✕</button>
+        `;
+        container.appendChild(div);
+    }
+
+    function addExternalLinkField(url, anchor) {
+        const container = document.getElementById('externalLinksContainer');
+        const div = document.createElement('div');
+        div.className = 'link-item';
+        div.innerHTML = `
+            <input type="url" name="externalLinkUrl[]" value="${url}" placeholder="URL externa">
+            <input type="text" name="externalLinkAnchor[]" value="${anchor}" placeholder="Texto âncora">
+            <button type="button" class="btn-remove" onclick="this.parentElement.remove()">✕</button>
+        `;
+        container.appendChild(div);
+    }
+
+    function showStatus(message, type) {
+        if (!autofillStatus) return;
+        
+        autofillStatus.textContent = message;
+        autofillStatus.className = `autofill-status ${type}`;
+        
+        if (type === 'success') {
+            setTimeout(() => {
+                autofillStatus.style.display = 'none';
+            }, 5000);
+        }
     }
 });
 

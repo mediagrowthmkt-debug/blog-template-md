@@ -26,8 +26,8 @@
     <link href="https://api.fontshare.com/v2/css?f[]=mazzard-h@400,700&f[]=mazzard-m@400,600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript><link href="https://api.fontshare.com/v2/css?f[]=mazzard-h@400,700&f[]=mazzard-m@400,600&display=swap" rel="stylesheet"></noscript>
     
-    <link rel="stylesheet" href="assets/css/form-style.css?v=1771363648">
-    <script src="scripts/github-api.js?v=1771363648" defer></script>
+    <link rel="stylesheet" href="assets/css/form-style.css?v=1771364111">
+    <script src="scripts/github-api.js?v=1771364111" defer></script>
 </head>
 <body>
     <div class="container">
@@ -58,7 +58,55 @@
 
         <form id="blogForm" class="blog-form">
             
-            <!-- 🧱 BLOCO 1: IDENTIDADE DO POST -->
+            <!-- � BLOCO 0: AUTO-PREENCHIMENTO INTELIGENTE -->
+            <section class="form-section ai-autofill-section">
+                <h2>🤖 BLOCO 0: Auto-Preenchimento Inteligente</h2>
+                
+                <div class="ai-instructions">
+                    <p><strong>💡 Como funciona:</strong></p>
+                    <ol>
+                        <li>Cole o texto formatado da IA no campo abaixo</li>
+                        <li>Clique em <strong>"🚀 Preencher Automaticamente"</strong></li>
+                        <li>O sistema identifica cada campo e preenche o formulário</li>
+                        <li>Revise os campos preenchidos e faça ajustes se necessário</li>
+                        <li>Clique em <strong>"✨ Gerar Post"</strong> no final da página</li>
+                    </ol>
+                </div>
+
+                <div class="form-group">
+                    <label for="aiAutofillText">
+                        📋 Cole aqui o texto formatado da IA
+                        <span class="tooltip">O sistema identificará automaticamente os blocos e preencherá o formulário</span>
+                    </label>
+                    <textarea id="aiAutofillText" 
+                              name="aiAutofillText" 
+                              rows="15" 
+                              placeholder="Cole aqui o texto formatado com os blocos:
+
+🧱 BLOCK 1: POST IDENTITY
+Title Principal (H1): Seu título aqui
+Slug / URL Amigável: seu-slug-aqui
+...
+
+🧠 BLOCK 2: ESSENTIAL SEO
+Palavra-chave Principal: sua palavra-chave
+..."></textarea>
+                    <small class="field-info">✨ O sistema suporta formatação em português e inglês</small>
+                </div>
+
+                <div class="autofill-actions">
+                    <button type="button" id="autoFillBtn" class="btn-ai">
+                        🚀 Preencher Automaticamente
+                    </button>
+                    <button type="button" id="clearAutofillBtn" class="btn-secondary">
+                        🗑️ Limpar Texto
+                    </button>
+                </div>
+
+                <div id="autofillStatus" class="autofill-status"></div>
+            </section>
+
+            <!-- �🧱 BLOCO 1: IDENTIDADE DO POST -->
             <section class="form-section">
                 <h2>🧱 BLOCO 1: Identidade do Post</h2>
                 
@@ -554,43 +602,12 @@
 
                 <div class="form-group">
                     <label for="aiTemplate">
-                        📋 Template Completo (preencha os [COLCHETES] e copie tudo)
-                        <span class="tooltip">Substitua [VALORES] com suas informações antes de copiar</span>
+                        📋 Template Completo para IA (Cole no ChatGPT/Claude)
+                        <span class="tooltip">⚠️ O "Conteúdo Principal" deve vir em HTML (<h2>, <h3>, <p>, <ul>, <li>)</span>
                     </label>
                     <textarea id="aiTemplate" 
                               name="aiTemplate" 
-                              rows="55">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ ANTES DE COPIAR O TEMPLATE - PREENCHA SEU CONTEXTO DE NEGÓCIO
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-📋 CONTEXTO DO SEU NEGÓCIO (Preencha antes de usar o template):
-
-🏢 Minha empresa é: [DESCREVA SUA EMPRESA EM 1-2 LINHAS]
-Exemplo: "Somos uma empresa de paisagismo comercial especializada em projetos sustentáveis para condomínios de alto padrão"
-
-🎯 Objetivo principal do blog: [QUAL É O OBJETIVO?]
-Exemplo: "Gerar leads qualificados interessados em orçamentos de paisagismo" OU "Educar o mercado sobre sustentabilidade em paisagismo"
-
-👥 Público-alvo: [QUEM É SEU CLIENTE IDEAL?]
-Exemplo: "Síndicos de condomínios de luxo em São Paulo, 40-60 anos, preocupados com valorização do imóvel"
-
-🏆 Nicho/Segmento: [EM QUE MERCADO VOCÊ ATUA?]
-Exemplo: "Paisagismo comercial sustentável" OU "Advocacia trabalhista para empresas de tecnologia"
-
-🔑 Palavras-chave principais do seu negócio: [LISTE 3-5 TERMOS]
-Exemplo: "paisagismo para condomínios, jardim vertical sustentável, projeto paisagístico corporativo"
-
-💡 Diferenciais da sua empresa: [O QUE TE TORNA ÚNICO?]
-Exemplo: "15 anos de experiência, certificação LEED, projetos premiados, manutenção inclusa no pacote"
-
-📍 Localização (se relevante): [CIDADE/REGIÃO DE ATUAÇÃO]
-Exemplo: "São Paulo - SP e região metropolitana"
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ APÓS PREENCHER O CONTEXTO ACIMA, COPIE TODO O TEMPLATE ABAIXO
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🎯 MISSÃO PRINCIPAL
+                              rows="45">🎯 MISSÃO PRINCIPAL
 Crie um blog post altamente persuasivo, otimizado para SEO e focado em geração de leads, combinando técnicas avançadas de copywriting emocional, autoridade, prova social e otimização semântica, com o objetivo de ranquear no Google e converter visitantes em leads qualificados.
 
 🎯 OBJETIVO ESTRATÉGICO
@@ -640,6 +657,24 @@ SEO E CONTEÚDO:
 🚀 FOCO FINAL
 Este conteúdo não é apenas informativo. Ele deve: EDUCAR, CONVENCER, CRIAR DESEJO e LEVAR À AÇÃO.
 Escreva como um especialista em SEO e copywriting focado em conversão, não como um redator genérico.
+
+⚠️ REGRA CRÍTICA DE FORMATAÇÃO:
+O "Conteúdo Principal" do BLOCO 4 DEVE ser escrito SEMPRE em HTML formatado usando:
+• <h2> para títulos de seções principais
+• <h3> para subtítulos
+• <p> para parágrafos
+• <ul> e <li> para listas não ordenadas
+• <ol> e <li> para listas ordenadas
+• <strong> para negrito, <em> para itálico
+
+EXEMPLO CORRETO:
+<h2>Por Que Investir em Paisagismo Sustentável?</h2>
+<p>O paisagismo sustentável não é apenas uma tendência, é uma necessidade para condomínios modernos.</p>
+<ul>
+  <li>Redução de custos com manutenção</li>
+  <li>Valorização do imóvel</li>
+  <li>Consciência ambiental</li>
+</ul>
 
 ================================================================================
 
@@ -699,7 +734,22 @@ Imagem Interna 3 - Alt Text (opcional):
 Introdução [100-150 palavras]:
 
 
-Conteúdo Principal [use HTML: <h2>, <h3>, <p>, <ul>, <li>]:
+Conteúdo Principal [SEMPRE use HTML formatado: <h2>, <h3>, <p>, <ul>, <li>]:
+
+<h2>Título da Seção Principal</h2>
+<p>Parágrafo explicativo aqui...</p>
+
+<h3>Subtítulo</h3>
+<p>Mais conteúdo detalhado.</p>
+
+<ul>
+  <li>Item de lista 1</li>
+  <li>Item de lista 2</li>
+  <li>Item de lista 3</li>
+</ul>
+
+<h2>Segunda Seção Principal</h2>
+<p>Continue desenvolvendo o conteúdo com HTML formatado.</p>
 
 
 Conclusão:
@@ -832,6 +882,6 @@ Habilitar botões de compartilhamento? [Sim/Não]:</textarea>
         </div>
     </div>
 
-    <script src="assets/js/form-script.js"></script>
+    <script src="assets/js/form-script.js?v=1771364111"></script>
 </body>
 </html>
