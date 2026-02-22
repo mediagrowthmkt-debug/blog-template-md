@@ -1225,7 +1225,7 @@ function generateFullPreviewPage(data) {
         <footer class="post-footer">
             <div class="tags">
                 <strong>Tags:</strong>
-                ${data.tagsArray ? data.tagsArray.map(tag => `<a href="#" class="tag">#${tag}</a>`).join(' ') : ''}
+                ${data.tagsArray ? data.tagsArray.map(tag => `<span class="tag">#${tag}</span>`).join(' ') : ''}
             </div>
         </footer>
     </article>
@@ -1623,9 +1623,9 @@ async function generatePostHtml(data) {
         }
     }
     
-    // Gera HTML das tags
+    // Gera HTML das tags (não clicáveis)
     const tagsHtml = data.tagsArray ? data.tagsArray.map(tag => 
-        `<a href="${sanitizeUrl(data.siteUrl)}/blog/tag/${generateSlug(tag)}" class="tag">#${escapeHtml(tag)}</a>`
+        `<span class="tag">#${escapeHtml(tag)}</span>`
     ).join(' ') : '';
     
     // Detecta idioma baseado no conteúdo
