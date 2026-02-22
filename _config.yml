@@ -1,0 +1,10 @@
+# Configuração do Jekyll para GitHub Pages
+permalink: pretty
+include: ['_pages']
+
+# Remove extensão .html das URLs
+defaults:
+  - scope:
+      path: ""
+    values:
+      permalink: /:title/

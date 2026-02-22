@@ -39,8 +39,8 @@ async function loadRelatedPosts() {
         if (isLocal) {
             // Modo LOCAL - Lista manual de posts
             htmlFiles = [
-                { name: 'marble-or-granite-guide-for-your-home-in-worcester.html' },
-                { name: 'window-replacement-massachusetts-guide.html' }
+                { name: 'marble-or-granite-guide-for-your-home-in-worcester' },
+                { name: 'window-replacement-massachusetts-guide' }
             ];
         } else {
             // Modo GITHUB PAGES - Busca via API
@@ -104,7 +104,9 @@ async function loadPostMetadata(filename) {
     try {
         // Determina o caminho base
         const basePath = window.location.pathname.includes('/posts/') ? '' : 'posts/';
-        const url = basePath + filename;
+        // Adiciona .html para buscar o arquivo físico, mas a URL exibida será sem extensão
+        const fileToFetch = filename.endsWith('.html') ? filename : filename + '.html';
+        const url = basePath + fileToFetch;
         
         const response = await fetch(url);
         if (!response.ok) throw new Error('Post não encontrado');
@@ -128,7 +130,7 @@ async function loadPostMetadata(filename) {
             excerpt: description.trim().substring(0, 100) + (description.length > 100 ? '...' : ''),
             image: image,
             category: category.trim(),
-            url: filename
+            url: filename.replace('.html', '') // Remove .html da URL exibida
         };
     } catch (error) {
         console.error('Erro ao carregar post:', filename, error);

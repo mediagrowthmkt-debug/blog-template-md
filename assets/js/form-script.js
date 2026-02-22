@@ -1161,8 +1161,8 @@ function generateFullPreviewPage(data) {
     <!-- NAVIGATION -->
     <nav class="main-navigation" aria-label="Main Navigation">
         <div class="nav-container">
-            <a href="${data.siteUrl || '#'}" class="nav-link">Home</a>
-            <a href="/posts" class="nav-link">Blog</a>
+            <a href="https://mediagrowth.com.br" class="nav-link">Site Oficial</a>
+            <a href="https://blogs.mediagrowth.com.br" class="nav-link">Ver Todos os Blogs</a>
         </div>
     </nav>
 
@@ -1957,8 +1957,8 @@ async function generatePostHtml(data) {
     <!-- NAVIGATION -->
     <nav class="main-navigation" aria-label="Main Navigation">
         <div class="nav-container">
-            <a href="${sanitizeUrl(data.siteUrl) || '/'}" class="nav-link">Home</a>
-            <a href="/posts" class="nav-link">Blog</a>
+            <a href="https://mediagrowth.com.br" class="nav-link">Site Oficial</a>
+            <a href="https://blogs.mediagrowth.com.br" class="nav-link">Ver Todos os Blogs</a>
         </div>
     </nav>
 
