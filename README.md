@@ -1,433 +1,253 @@
-# 📝 Sistema de Criação de Posts - Blog SUA EMPRESA
+# 📝 Sistema de Blog MediaGrowth - Template Completo
 
-Sistema completo e automatizado para criar posts de blog otimizados para SEO, seguindo as melhores práticas do Google.
+Sistema automatizado para criar e publicar posts de blog otimizados para SEO, com publicação direta no GitHub Pages.
 
----
-
-## � ATUALIZAÇÃO - Janeiro 2026
-
-### ✨ Novas Funcionalidades v2.0
-
-#### 1. 🧭 Navegação Simplificada
-- **Antes:** Breadcrumb detalhado (Home › Blog › Categoria › Post)
-- **Agora:** Navegação limpa com apenas Home + Blog
-
-#### 2. 🖼️ Sistema de Layouts de Imagem
-Agora você pode distribuir imagens no conteúdo usando 4 layouts:
-- **image-left** - Imagem à esquerda com texto ao redor
-- **image-right** - Imagem à direita com texto ao redor
-- **image-full** - Imagem em largura total
-- **image-grid** - Grade de múltiplas imagens
-
-#### 3. � Suporte a Google Drive (NOVO!)
-Cole links diretos do Google Drive no formulário:
-```
-https://drive.google.com/file/d/FILE_ID/view?usp=sharing
-```
-O sistema converte automaticamente para URLs de imagem utilizáveis!
-
-#### 4.  Layout Desktop Full Width
-- **Antes:** 800px de largura máxima
-- **Agora:** 1400px de largura máxima
-- Melhor aproveitamento de telas grandes
-
-#### 5. 💬 Comentários Removidos
-- Seção de comentários desabilitada por padrão
-- Código mantido comentado para reativação futura
-
-📖 **Documentação das Novas Funcionalidades:**
-- [`docs/QUICK-START-NEW-TEMPLATE.md`](docs/QUICK-START-NEW-TEMPLATE.md) - Começar rápido
-- [`docs/guides/IMAGE-LAYOUTS-GUIDE.md`](docs/guides/IMAGE-LAYOUTS-GUIDE.md) - Guia completo de layouts
-- [`docs/guides/GOOGLE-DRIVE-IMAGES-GUIDE.md`](docs/guides/GOOGLE-DRIVE-IMAGES-GUIDE.md) - Como usar Google Drive
-- [`docs/updates/CHANGELOG.md`](docs/updates/CHANGELOG.md) - Detalhes técnicos completos
-- [`docs/updates/SUMMARY.md`](docs/updates/SUMMARY.md) - Resumo executivo
-- [`templates/example-post-visual.html`](templates/example-post-visual.html) - Exemplo visual
+**Versão:** 2.0 | **Status:** ✅ Produção | **Custo:** $0.00 (GitHub Pages gratuito)
 
 ---
 
-## �🎯 O que este sistema faz?
+## 🚀 INÍCIO RÁPIDO
 
-Este sistema permite criar posts de blog profissionais de forma rápida e automatizada, incluindo:
+### Criar um Post (5 minutos)
 
-- ✅ **SEO Completo**: Meta tags, Schema.org, Open Graph, Twitter Cards
-- ✅ **URLs Amigáveis**: Slugs automáticos sem acentos e stopwords
-- ✅ **Otimização de Imagens**: Alt text, captions, lazy loading
-- ✅ **Links Internos e Externos**: Para melhorar rankeamento
-- ✅ **Tags e Categorias**: Organização inteligente
-- ✅ **CTAs**: Call-to-actions para conversão
-- ✅ **Responsivo**: Funciona em desktop, tablet e mobile
-- ✅ **Acessível**: Seguindo padrões WCAG
+1. Acesse [`postin.html`](postin.html)
+2. Preencha formulário completo
+3. Clique em "👁️ Visualizar Preview"
+4. Revise tudo
+5. Clique em "🚀 Publicar Post"
+6. ✅ Post online em 1-3 minutos!
 
----
+**[📖 Ver guia detalhado →](docs/QUICK-START.md)**
 
-## 📁 Estrutura do Projeto
+### Replicar para Novo Cliente (30-45 minutos)
 
-O projeto está organizado de forma modular e intuitiva:
+1. Fork do repositório
+2. Ativar GitHub Pages
+3. Personalizar (logo/cores/textos)
+4. Testar tudo
+5. Treinar cliente
 
-```
-📂 Raiz ........................ Arquivos principais (index, postin)
-📂 assets/ ..................... CSS, JavaScript e imagens
-📂 docs/ ....................... Toda a documentação organizada
-   ├── guides/ ................. Guias de uso
-   ├── security/ ............... Docs de segurança  
-   └── updates/ ................ Changelogs
-📂 posts/ ...................... Posts publicados
-📂 templates/ .................. Templates de posts
-📂 scripts/ .................... Scripts de automação
-📂 examples/ ................... Exemplos e testes
-📂 drafts/ ..................... Rascunhos
-```
-
-📖 **Ver estrutura completa:** [`ESTRUTURA.md`](ESTRUTURA.md)
+**[🚀 Ver checklist completo →](docs/GUIA-REPLICACAO-CLIENTE.md)**
 
 ---
 
-## 🚀 Como Usar
+## ✨ FUNCIONALIDADES
 
-### 1️⃣ Abrir o Formulário
-
-Abra o arquivo `postin.html` no seu navegador:
-
-```bash
-# No macOS
-open [CAMINHO-DO-SEU-BLOG]/postin.html
-
-# Ou arraste o arquivo para o navegador
-# Ou acesse: https://blog.SEU-DOMINIO.com/postin
-```
-
-### 2️⃣ Preencher os Campos
-
-O formulário está dividido em **9 blocos** para facilitar:
-
-#### 🧱 BLOCO 1: Identidade do Post
-- **Título (H1)**: Até 60 caracteres, com palavra-chave no início
-- **Slug**: Gerado automaticamente, mas pode editar
-- **Categoria**: Guia, Tutorial, Blog, Vlog, etc.
-- **Autor**: Nome completo
-- **Data**: Automática ou personalizada
-
-#### 🧠 BLOCO 2: SEO Essencial
-- **Palavra-chave Principal**: Apenas 1, base do post
-- **Palavras-chave Secundárias**: 3 a 5, separadas por vírgula
-- **Meta Title**: Título para Google (até 60 caracteres)
-- **Meta Description**: 140-160 caracteres persuasivos
-- **Intenção de Busca**: Informacional, Comercial, etc.
-
-#### 🖼️ BLOCO 3: Imagens
-- **Imagem de Capa**: 1200x630px, URL completa
-- **Alt Text**: Descritivo com palavra-chave
-- **Imagens Internas**: Mínimo 2, cada uma com alt text
-
-#### ✍️ BLOCO 4: Conteúdo
-- **Introdução**: 100-150 palavras, keyword no 1º parágrafo
-- **Conteúdo Principal**: Use HTML (h2, h3, p, ul, ol)
-- **Conclusão**: Resumo + CTA leve
-
-#### 🔗 BLOCO 5: Links
-- **Links Internos**: 2-4 para outros posts/páginas
-- **Links Externos**: 1-2 para sites confiáveis
-- **Anchor Text**: Nunca use "clique aqui"
-
-#### 🏷️ BLOCO 6: Tags
-- **Tags**: 3 a 6, separadas por vírgula
-- **Posts Relacionados**: URLs separadas por vírgula
-
-#### 🚀 BLOCO 7: Engajamento
-- **CTA**: Título, texto, link e botão
-
-#### ⚙️ BLOCO 8: Configurações
-- **URL Base**: https://SEU-DOMINIO.com
-- **Logo**: Para Schema.org
-- **Opções**: Comentários, compartilhamento
-
-### 3️⃣ Gerar o Post
-
-1. Clique em **"👁️ Pré-visualizar"** para ver como ficará
-2. Clique em **"✨ Gerar Post"** para criar o arquivo HTML
-3. O post será baixado automaticamente como `seu-slug.html`
-
-### 4️⃣ Publicar o Post (GitHub Pages)
-
-1. Mova o arquivo gerado para a pasta `posts/`
-2. Faça commit e push para o GitHub
-3. O post estará acessível em: `seusite.github.io/posts/seu-slug.html`
+- ✅ **Interface Visual Intuitiva** - Formulário completo para criar posts
+- ✅ **Preview em Tempo Real** - Veja antes de publicar
+- ✅ **Publicação Automatizada** - Direto no GitHub via API
+- ✅ **Sistema de 3 Imagens** - Layouts adaptativos (full/left/left)
+- ✅ **Formulário de Leads** - Captura de contatos com webhook
+- ✅ **Posts Relacionados** - Carregamento dinâmico automático
+- ✅ **SEO Completo** - Meta tags, Schema.org, Open Graph, Twitter Cards
+- ✅ **Multilíngue** - Detecção automática PT/EN
+- ✅ **Design Responsivo** - Mobile-first, dark theme profissional
+- ✅ **Header & Footer** - Logo da empresa em todas as páginas
 
 ---
 
-## ⚙️ Funcionalidades Automáticas
+## 📚 DOCUMENTAÇÃO COMPLETA
 
-### 🤖 O que o sistema faz sozinho:
-
-1. **Gera slug SEO-friendly**
-   - Remove acentos
-   - Remove stopwords (o, a, de, da, etc.)
-   - Converte para lowercase
-   - Substitui espaços por hífens
-
-2. **Calcula tempo de leitura**
-   - Baseado em 200 palavras/minuto
-   - Atualizado em tempo real
-
-3. **Conta caracteres e palavras**
-   - Alerta quando próximo do limite
-   - Ajuda a manter tamanhos ideais
-
-4. **Cria Schema Markup**
-   - Article schema
-   - Breadcrumb schema
-   - Author e Publisher
-
-5. **Gera Open Graph e Twitter Cards**
-   - Para compartilhamento em redes sociais
-   - Preview bonito no Facebook, LinkedIn, etc.
-
-6. **Formata URLs**
-   - Canonicals
-   - Breadcrumbs
-   - Links internos
+| Documento | Descrição | Tempo |
+|-----------|-----------|-------|
+| **[📘 Documentação Completa](docs/DOCUMENTACAO-COMPLETA.md)** | Guia completo: arquitetura, fluxo, tudo | 30 min |
+| **[🚀 Guia de Replicação](docs/GUIA-REPLICACAO-CLIENTE.md)** | Duplicar blog para novo cliente | 15 min |
+| **[📊 Fluxograma do Sistema](docs/FLUXOGRAMA-SISTEMA.md)** | Diagramas visuais de todo o fluxo | 10 min |
+| **[❓ FAQ & Troubleshooting](docs/FAQ-TROUBLESHOOTING.md)** | Problemas comuns e soluções | 15 min |
+| **[⚡ Quick Start](docs/QUICK-START.md)** | Criar primeiro post em 5 minutos | 5 min |
+| **[📑 Índice Completo](docs/INDEX.md)** | Todos os documentos organizados | 2 min |
 
 ---
 
-## 🎨 Recursos Interativos do Post
+## 🏗️ ARQUITETURA
 
-Cada post gerado inclui:
-
-### 📱 Back to Top
-- Botão flutuante que aparece ao scrollar
-- Volta ao topo suavemente
-
-### 🔗 Compartilhar
-- Usa Web Share API (mobile)
-- Copia link automaticamente (desktop)
-
-### 📊 Barra de Progresso
-- Mostra quanto do post foi lido
-- Barra azul no topo
-
-### 🎯 Links Externos
-- Abre em nova aba
-- Ícone de link externo ↗
-
-### 📈 Analytics
-- Registra tempo de leitura
-- Mede profundidade de scroll
-
----
-
-## 🔧 Personalizações
-
-### Alterar Cores
-
-Edite o arquivo `assets/css/blog-post.css`:
-
-```css
-:root {
-    --primary-color: #2c3e50;      /* Cor principal */
-    --secondary-color: #3498db;     /* Cor secundária */
-    --accent-color: #e74c3c;        /* Cor de destaque */
-}
+```
+Stack Tecnológico:
+├── Frontend:    HTML5 + CSS3 + JavaScript (Vanilla)
+├── Hospedagem:  GitHub Pages (gratuito)
+├── API:         GitHub REST API v3
+├── Build:       Jekyll (automático)
+├── CDN:         GitHub CDN global
+└── SSL:         Let's Encrypt (automático)
 ```
 
-### Adicionar Google Analytics
+### Fluxo Simplificado
 
-No template `templates/post-template.html`, adicione antes de `</head>`:
-
-```html
-<!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-XXXXXXXXXX');
-</script>
 ```
-
-### Adicionar Comentários
-
-Opções populares:
-
-**Disqus:**
-```html
-<div id="disqus_thread"></div>
-<script>
-    var disqus_config = function () {
-        this.page.url = '{{CANONICAL_URL}}';
-        this.page.identifier = '{{SLUG}}';
-    };
-    (function() {
-        var d = document, s = d.createElement('script');
-        s.src = 'https://SEU-SITE.disqus.com/embed.js';
-        s.setAttribute('data-timestamp', +new Date());
-        (d.head || d.body).appendChild(s);
-    })();
-</script>
-```
-
-**Facebook Comments:**
-```html
-<div class="fb-comments" 
-     data-href="{{CANONICAL_URL}}" 
-     data-width="100%" 
-     data-numposts="5">
-</div>
+┌─────────────┐
+│ FORMULÁRIO  │ → Preenche dados (postin.html)
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│ PREVIEW     │ → Revisa visual
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│ GITHUB API  │ → Publica via API
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│ ONLINE      │ → 1-3 minutos
+└─────────────┘
 ```
 
 ---
 
-## 📊 Checklist de SEO
+## 📁 ESTRUTURA DO PROJETO
 
-Antes de publicar, verifique:
-
-- [ ] Título H1 com keyword no início (max 60 caracteres)
-- [ ] Meta title otimizado (diferente do H1 se necessário)
-- [ ] Meta description persuasiva (140-160 caracteres)
-- [ ] Slug limpo sem stopwords
-- [ ] Imagem de capa 1200x630px
-- [ ] Alt text em todas as imagens
-- [ ] Palavra-chave na introdução
-- [ ] Parágrafos curtos (2-4 linhas)
-- [ ] H2 e H3 bem estruturados
-- [ ] 2-4 links internos
-- [ ] 1-2 links externos confiáveis
-- [ ] 3-6 tags relevantes
-- [ ] CTA claro e atraente
-- [ ] Schema markup presente
-- [ ] Open Graph configurado
-- [ ] Mobile-friendly
-
----
-
-## 🔍 Dicas de Otimização
-
-### Para Rankeamento no Google:
-
-1. **Keyword Research**
-   - Use Google Keyword Planner
-   - Verifique volume de busca
-   - Analise concorrência
-
-2. **Densidade de Keyword**
-   - 1-2% do texto total
-   - Natural, não forçado
-   - Variações e sinônimos
-
-3. **Heading Structure**
-   - Apenas 1 H1 por página
-   - H2 para seções principais
-   - H3 para subseções
-
-4. **Links Internos**
-   - Link para posts relacionados
-   - Anchor text descritivo
-   - Profundidade de 2-3 cliques
-
-5. **Imagens Otimizadas**
-   - Comprimir antes do upload
-   - Formato WebP quando possível
-   - Nome do arquivo com keyword
-
-6. **Velocidade**
-   - Minimize CSS e JS
-   - Use CDN para imagens
-   - Lazy loading
-
----
-
-## 🐛 Solução de Problemas
-
-### Post não está gerando
-
-**Problema**: Clica em "Gerar Post" mas nada acontece
-**Solução**: 
-1. Abra o Console (F12)
-2. Verifique erros em vermelho
-3. Preencha todos os campos obrigatórios (*)
-
-### Slug com caracteres estranhos
-
-**Problema**: Slug com acentos ou caracteres especiais
-**Solução**: O slug é gerado automaticamente, mas você pode editá-lo manualmente
-
-### Imagens não aparecem
-
-**Problema**: Imagens quebradas no post
-**Solução**: 
-1. Verifique se as URLs estão completas (https://...)
-2. Teste a URL da imagem no navegador
-3. Confirme que o servidor permite hotlinking
-
-### CSS não carrega
-
-**Problema**: Post sem estilo
-**Solução**: Verifique o caminho relativo no HTML:
-```html
-<link rel="stylesheet" href="../assets/css/blog-post.css">
+```
+blog-template-md/
+├── index.html              # Página principal (lista posts)
+├── postin.html            # Interface de criação
+├── _config.yml            # Config Jekyll (URLs limpas)
+│
+├── assets/
+│   ├── css/               # Estilos
+│   ├── js/                # Lógica (3230 linhas)
+│   └── images/            # Logo e favicon
+│
+├── posts/                 # Posts publicados
+│
+└── docs/                  # 📚 Documentação completa
+    ├── DOCUMENTACAO-COMPLETA.md
+    ├── GUIA-REPLICACAO-CLIENTE.md
+    ├── FLUXOGRAMA-SISTEMA.md
+    ├── FAQ-TROUBLESHOOTING.md
+    ├── guides/
+    ├── security/
+    └── updates/
 ```
 
 ---
 
-## 📚 Recursos Adicionais
+## 💡 POR QUE USAR ESTE SISTEMA?
 
-### Ferramentas Úteis
+### Vantagens
 
-- **Gerador de Slugs**: [slugify.online](https://slugify.online/)
-- **Análise de Keywords**: [Google Keyword Planner](https://ads.google.com/keyword-planner)
-- **Compressor de Imagens**: [TinyPNG](https://tinypng.com/)
-- **Teste de Schema**: [Schema Markup Validator](https://validator.schema.org/)
-- **Teste Open Graph**: [OpenGraph.xyz](https://www.opengraph.xyz/)
-- **PageSpeed**: [PageSpeed Insights](https://pagespeed.web.dev/)
+✅ **Zero Custo** - GitHub Pages 100% gratuito  
+✅ **Zero Servidor** - Tudo client-side  
+✅ **Zero Manutenção** - GitHub gerencia tudo  
+✅ **Escalável** - CDN global automático  
+✅ **Seguro** - HTTPS automático  
+✅ **Versionado** - Git nativo  
+✅ **Backup Automático** - Histórico Git completo  
 
-### Leitura Recomendada
+### Ideal Para
 
-- [Google Search Central](https://developers.google.com/search/docs)
-- [Schema.org Documentation](https://schema.org/)
-- [Web.dev SEO Guide](https://web.dev/lighthouse-seo/)
-
----
-
-## 🔄 Atualizações Futuras
-
-Recursos planejados:
-
-- [ ] Editor WYSIWYG integrado
-- [ ] Upload direto de imagens
-- [ ] Preview em mobile/tablet
-- [ ] Análise de SEO em tempo real
-- [ ] Integração com WordPress
-- [ ] Versionamento de posts
-- [ ] Sistema de rascunhos
-- [ ] Agenda de publicações
+✅ Blogs corporativos  
+✅ Sites de conteúdo  
+✅ Documentação  
+✅ Landing pages  
+✅ Portfolios  
 
 ---
 
-## 📞 Suporte
+## 🎓 GUIAS RÁPIDOS
 
-Para dúvidas ou problemas:
+### Criação de Conteúdo
+- [Como criar um post](docs/DOCUMENTACAO-COMPLETA.md#passo-2-preencher-o-formulário)
+- [Sistema de imagens](docs/DOCUMENTACAO-COMPLETA.md#sistema-de-imagens)
+- [Formulário de leads](docs/DOCUMENTACAO-COMPLETA.md#formulário-de-captura-de-leads)
+- [SEO e meta tags](docs/DOCUMENTACAO-COMPLETA.md#seo-e-meta-tags)
 
-- 📧 Email: contato@SEU-DOMINIO.com
-- 🌐 Site: https://SEU-DOMINIO.com
-- 📱 WhatsApp: (XXX) XXX-XXXX
+### Publicação
+- [Publicar no GitHub](docs/DOCUMENTACAO-COMPLETA.md#publicação-no-github)
+- [Configurar domínio](docs/GUIA-REPLICACAO-CLIENTE.md#fase-6-configurar-domínio-customizado)
+- [Preview antes de publicar](docs/DOCUMENTACAO-COMPLETA.md#passo-3-visualizar-preview)
+
+### Personalização
+- [Trocar logo e cores](docs/GUIA-REPLICACAO-CLIENTE.md#fase-4-personalização-visual)
+- [Editar textos](docs/GUIA-REPLICACAO-CLIENTE.md#43-textos-e-links)
+- [Configurar webhook](docs/FAQ-TROUBLESHOOTING.md#formulário-de-leads)
+
+### Manutenção
+- [Editar post existente](docs/FAQ-TROUBLESHOOTING.md#q-posso-editar-um-post-depois-de-publicado)
+- [Deletar post](docs/FAQ-TROUBLESHOOTING.md#q-como-deleto-um-post)
+- [Fazer backup](docs/FAQ-TROUBLESHOOTING.md#backup-e-restore-completo)
+- [Resolver problemas](docs/FAQ-TROUBLESHOOTING.md)
 
 ---
 
-## 📄 Licença
+## 🔗 LINKS IMPORTANTES
 
-© 2026 SUA EMPRESA. Todos os direitos reservados.
+### Produção
+- **Blog:** https://mediagrowthmkt-debug.github.io/blog-template-md/
+- **Criar Post:** https://mediagrowthmkt-debug.github.io/blog-template-md/postin.html
+- **GitHub Repo:** https://github.com/mediagrowthmkt-debug/blog-template-md
 
----
-
-## ✨ Começe Agora!
-
-1. Abra `postin.html` no navegador (ou acesse `/postin`)
-2. Preencha o formulário
-3. Gere seu primeiro post
-4. Publique e veja seu ranking melhorar!
-
-**Dica**: Publique regularmente (1-2 posts por semana) para melhores resultados SEO.
+### Ferramentas
+- **GitHub Token:** https://github.com/settings/tokens
+- **Search Console:** https://search.google.com/search-console
+- **TinyPNG:** https://tinypng.com (comprimir imagens)
+- **Webhook Test:** https://webhook.site (testar webhooks)
 
 ---
 
-📝 **Última atualização**: Janeiro 2026 - Ajuste de segurança nas URLs
-🚀 **Versão**: 1.0.0
+## 📊 ESTATÍSTICAS
+
+```
+Linhas de Código:    ~5.400
+Funções JavaScript:  45+
+Classes CSS:         150+
+Layouts de Imagem:   3 tipos
+Idiomas:             2 (PT/EN)
+Tempo de Deploy:     1-3 minutos
+Custo Hospedagem:    $0.00
+```
+
+---
+
+## 🆕 VERSÃO 2.0 - Fevereiro 2026
+
+### Últimas Atualizações
+
+- ✅ Header e footer com logo em todas as páginas
+- ✅ Sistema de 3 imagens otimizado (full/left/left)
+- ✅ Prevenção de imagens duplicadas
+- ✅ Layout compacto (900px max-width)
+- ✅ Navegação simplificada (2 links)
+- ✅ URLs limpas (sem .html)
+- ✅ Tags não-clicáveis
+- ✅ Documentação completa
+
+**[Ver changelog completo →](docs/updates/CHANGELOG.md)**
+
+---
+
+## 📞 SUPORTE
+
+### MediaGrowth
+
+- **Site:** https://mediagrowth.com.br
+- **Email:** contato@mediagrowth.com.br
+- **GitHub:** https://github.com/mediagrowthmkt-debug
+
+### Comunidade
+
+- **Issues:** https://github.com/mediagrowthmkt-debug/blog-template-md/issues
+- **Discussions:** https://github.com/mediagrowthmkt-debug/blog-template-md/discussions
+
+---
+
+## 📝 LICENÇA
+
+Desenvolvido pela **MediaGrowth** para uso interno e de clientes.
+
+**Permissões:**
+- ✅ Usar para projetos de clientes
+- ✅ Modificar e personalizar
+- ✅ Criar backups
+
+**Restrições:**
+- ❌ Revender como produto standalone
+- ❌ Remover créditos da MediaGrowth
+
+---
+
+**Desenvolvido por:** MediaGrowth Development Team  
+**Última atualização:** 22 de fevereiro de 2026  
+**Versão:** 2.0
+
