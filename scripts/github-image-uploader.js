@@ -373,7 +373,25 @@ function setupImageUploadHandlers() {
  */
 async function uploadPendingImagesToGitHub(postSlug) {
     const token = localStorage.getItem('github_token');
-    const username = localStorage.getItem('github_username');
+    let username = localStorage.getItem('github_username');
+    
+    // Se não tem username, tenta buscar automaticamente via API
+    if (!username && token) {
+        console.log('🔍 Username não configurado, buscando via GitHub API...');
+        try {
+            const response = await fetch('https://api.github.com/user', {
+                headers: { 'Authorization': `token ${token}` }
+            });
+            if (response.ok) {
+                const userData = await response.json();
+                username = userData.login;
+                localStorage.setItem('github_username', username);
+                console.log(`✅ Username detectado e salvo: ${username}`);
+            }
+        } catch (error) {
+            console.error('❌ Erro ao buscar username:', error);
+        }
+    }
     
     if (!token || !username) {
         console.warn('⚠️ Token ou username não configurado. Imagens permanecerão em Base64.');
