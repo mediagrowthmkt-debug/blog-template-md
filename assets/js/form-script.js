@@ -1467,23 +1467,68 @@ async function savePostToServer(html, slug) {
                 
                 // Substitui URLs Base64 pelas URLs do GitHub no HTML
                 if (uploadedImages) {
+                    // Conta quantas substituições foram feitas
+                    let avatarSubstituted = 0;
+                    let coverSubstituted = 0;
+                    
                     if (uploadedImages.avatar) {
                         console.log('🔄 Substituindo avatar Base64 por:', uploadedImages.avatar);
-                        html = html.replace(/src="data:image\/[^"]+avatar[^"]+"/gi, `src="${uploadedImages.avatar}"`);
+                        // Substitui QUALQUER data:image que seja JPEG/JPG e esteja na seção de autor
+                        const beforeReplace = html;
+                        
+                        // Estratégia 1: Procura por avatar.jpg específico (se tiver)
+                        html = html.replace(/src="data:image\/[^"]+"/gi, (match) => {
+                            // Verifica se está próximo do nome do autor (contexto)
+                            const index = html.indexOf(match);
+                            const contextBefore = html.substring(Math.max(0, index - 500), index);
+                            const contextAfter = html.substring(index, Math.min(html.length, index + 500));
+                            
+                            // Se encontrar "author" ou "autor" perto, é o avatar
+                            if (/author|autor|avatar/i.test(contextBefore + contextAfter)) {
+                                console.log('  ✅ Avatar Base64 encontrado e substituído');
+                                avatarSubstituted++;
+                                return `src="${uploadedImages.avatar}"`;
+                            }
+                            return match;
+                        });
+                        
+                        console.log(`  📊 ${avatarSubstituted} avatar(s) substituído(s)`);
                     }
                     
                     if (uploadedImages.cover) {
                         console.log('🔄 Substituindo capa Base64 por:', uploadedImages.cover);
-                        html = html.replace(/src="data:image\/[^"]+capa[^"]+"/gi, `src="${uploadedImages.cover}"`);
+                        
+                        // Substitui primeiro data:image que não foi substituído ainda (provavelmente é a capa)
+                        html = html.replace(/src="data:image\/[^"]+"/i, (match) => {
+                            // Se não foi o avatar, é a capa
+                            if (!match.includes(uploadedImages.avatar)) {
+                                console.log('  ✅ Capa Base64 encontrada e substituída');
+                                coverSubstituted++;
+                                return `src="${uploadedImages.cover}"`;
+                            }
+                            return match;
+                        });
+                        
+                        console.log(`  📊 ${coverSubstituted} capa(s) substituída(s)`);
                     }
                     
                     // Substitui imagens internas
-                    if (uploadedImages.internalImages && uploadedImages.internalImages.length > 0) {
-                        console.log('🔄 Substituindo', uploadedImages.internalImages.length, 'imagens internas');
-                        uploadedImages.internalImages.forEach((img, index) => {
-                            const pattern = new RegExp(`data:image/[^"]+interna-${index}[^"]*`, 'gi');
-                            html = html.replace(pattern, img);
+                    if (uploadedImages.internals && uploadedImages.internals.length > 0) {
+                        console.log('🔄 Substituindo', uploadedImages.internals.length, 'imagens internas');
+                        
+                        uploadedImages.internals.forEach((url, index) => {
+                            // Substitui próximo data:image encontrado
+                            html = html.replace(/src="data:image\/[^"]+"/i, `src="${url}"`);
+                            console.log(`  ✅ Imagem interna ${index + 1} substituída: ${url.substring(0, 50)}...`);
                         });
+                    }
+                    
+                    // Verificação final
+                    const remainingBase64 = (html.match(/data:image\/[^"]+/g) || []).length;
+                    if (remainingBase64 > 0) {
+                        console.warn(`⚠️ ATENÇÃO: Ainda existem ${remainingBase64} imagens Base64 no HTML!`);
+                    } else {
+                        console.log('✅ Todas as imagens Base64 foram substituídas por URLs do GitHub');
                     }
                 }
             } else {
