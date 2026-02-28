@@ -26,9 +26,9 @@
     <link href="https://api.fontshare.com/v2/css?f[]=mazzard-h@400,700&f[]=mazzard-m@400,600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript><link href="https://api.fontshare.com/v2/css?f[]=mazzard-h@400,700&f[]=mazzard-m@400,600&display=swap" rel="stylesheet"></noscript>
     
-    <link rel="stylesheet" href="assets/css/form-style.css?v=11000000000">
+    <link rel="stylesheet" href="assets/css/form-style.css?v=12000000000">
     <script src="scripts/github-api.js?v=15000000000" defer></script>
-    <script src="scripts/github-image-uploader.js?v=17000000000" defer></script>
+    <script src="scripts/github-image-uploader.js?v=19000000000" defer></script>
 </head>
 <body>
     <div class="container">
@@ -55,6 +55,11 @@
                 <button type="button" id="configGitHub" class="btn-config">⚙️ Configurar GitHub</button>
             </div>
             <div id="autoSaveStatus" class="auto-save-status"></div>
+            
+            <!-- INDICADOR DE IMAGENS CARREGADAS -->
+            <div id="imagesLoadedIndicator" style="display: none; margin-top: 15px; padding: 12px 18px; background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(16, 185, 129, 0.15) 100%); border: 2px solid #22c55e; border-radius: 10px; color: #22c55e; font-weight: 600; font-size: 0.95rem;">
+                <span id="imagesLoadedCount">0</span> imagem(ns) pronta(s) para publicação 🖼️
+            </div>
         </header>
 
         <form id="blogForm" class="blog-form">
@@ -959,6 +964,6 @@ Habilitar botões de compartilhamento? [Sim/Não]:</textarea>
         </div>
     </div>
 
-    <script src="assets/js/form-script.js?v=16000000000"></script>
+    <script src="assets/js/form-script.js?v=17000000000"></script>
 </body>
 </html>

@@ -955,6 +955,28 @@ function insertTag(textarea, tag) {
 function showPreview() {
     const formData = collectFormData();
     
+    // ===================================================================
+    // INJETA IMAGENS DO pendingImages NO PREVIEW (AVATAR E CAPA)
+    // ===================================================================
+    if (window.pendingImages) {
+        console.log('🖼️ Injetando imagens do pendingImages no preview...');
+        
+        if (window.pendingImages.avatar && window.pendingImages.avatar.base64) {
+            formData.authorAvatar = window.pendingImages.avatar.base64;
+            console.log('✅ Avatar do pendingImages injetado no preview (Base64)');
+        }
+        
+        if (window.pendingImages.cover && window.pendingImages.cover.base64) {
+            formData.coverImage = window.pendingImages.cover.base64;
+            console.log('✅ Capa do pendingImages injetada no preview (Base64)');
+        }
+        
+        console.log('📊 Estado final das imagens no preview:', {
+            authorAvatar: formData.authorAvatar ? (formData.authorAvatar.startsWith('data:') ? 'Base64' : 'URL') : 'não definido',
+            coverImage: formData.coverImage ? (formData.coverImage.startsWith('data:') ? 'Base64' : 'URL') : 'não definido'
+        });
+    }
+    
     // Debug: mostra quantas imagens internas foram coletadas
     console.log('📸 Imagens Internas no Preview:', formData.internalImages);
     console.log('🔗 URLs das imagens:', formData.internalImages?.map(img => img.url) || []);
@@ -1927,6 +1949,29 @@ function collectFormData() {
 
 async function generatePostHtml(data) {
     console.log('📥 Gerando HTML do post (mesmo formato do preview)...');
+    
+    // ===================================================================
+    // INJETA IMAGENS DO pendingImages NO DATA (AVATAR E CAPA)
+    // ===================================================================
+    if (window.pendingImages) {
+        console.log('🖼️ Injetando imagens do pendingImages no HTML...');
+        
+        if (window.pendingImages.avatar && window.pendingImages.avatar.base64) {
+            data.authorAvatar = window.pendingImages.avatar.base64;
+            console.log('✅ Avatar do pendingImages injetado (Base64)');
+        }
+        
+        if (window.pendingImages.cover && window.pendingImages.cover.base64) {
+            data.coverImage = window.pendingImages.cover.base64;
+            console.log('✅ Capa do pendingImages injetada (Base64)');
+        }
+        
+        console.log('📊 Estado final das imagens:', {
+            authorAvatar: data.authorAvatar ? (data.authorAvatar.startsWith('data:') ? 'Base64' : 'URL') : 'não definido',
+            coverImage: data.coverImage ? (data.coverImage.startsWith('data:') ? 'Base64' : 'URL') : 'não definido'
+        });
+    }
+    
     console.log('🔗 DEBUG - Links recebidos em generatePostHtml:');
     console.log('  - internalLinks:', data.internalLinks);
     console.log('  - externalLinks:', data.externalLinks);

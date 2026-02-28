@@ -147,6 +147,9 @@ async function handleAvatarUpload(file) {
         }
 
         console.log('✅ Avatar preparado (Base64 local)');
+        
+        // Atualiza indicador visual
+        updateImagesLoadedIndicator();
 
     } catch (error) {
         console.error('❌ Erro ao processar avatar:', error);
@@ -156,6 +159,9 @@ async function handleAvatarUpload(file) {
             statusElement.classList.add('upload-error');
             statusElement.classList.add('show');
         }
+        
+        // Atualiza indicador mesmo com erro
+        updateImagesLoadedIndicator();
     }
 }
 
@@ -212,6 +218,9 @@ async function handleCoverUpload(file) {
         }
 
         console.log('✅ Capa preparada (Base64 local)');
+        
+        // Atualiza indicador visual
+        updateImagesLoadedIndicator();
 
     } catch (error) {
         console.error('❌ Erro ao processar capa:', error);
@@ -221,6 +230,9 @@ async function handleCoverUpload(file) {
             statusElement.classList.add('upload-error');
             statusElement.classList.add('show');
         }
+        
+        // Atualiza indicador mesmo com erro
+        updateImagesLoadedIndicator();
     }
 }
 
@@ -282,6 +294,9 @@ async function handleInternalImageUpload(file, targetInput, index) {
         }, 3000);
 
         console.log(`✅ Imagem interna ${index} preparada (Base64 local)`);
+        
+        // Atualiza indicador visual
+        updateImagesLoadedIndicator();
 
     } catch (error) {
         console.error(`❌ Erro ao processar imagem interna ${index}:`, error);
@@ -289,12 +304,40 @@ async function handleInternalImageUpload(file, targetInput, index) {
         statusElement.textContent = `❌ ${error.message}`;
         statusElement.classList.add('upload-error');
         statusElement.classList.add('show');
+        
+        // Atualiza indicador mesmo com erro
+        updateImagesLoadedIndicator();
     }
 }
 
 // ======================
 // CONFIGURAÇÃO DE HANDLERS
 // ======================
+
+/**
+ * Atualiza o indicador visual de imagens carregadas
+ */
+function updateImagesLoadedIndicator() {
+    const indicator = document.getElementById('imagesLoadedIndicator');
+    const countElement = document.getElementById('imagesLoadedCount');
+    
+    if (!indicator || !countElement) return;
+    
+    let count = 0;
+    if (window.pendingImages.avatar) count++;
+    if (window.pendingImages.cover) count++;
+    count += window.pendingImages.internals.length;
+    
+    if (count > 0) {
+        countElement.textContent = count;
+        indicator.style.display = 'block';
+        indicator.style.animation = 'slideInFromTop 0.4s ease-out';
+    } else {
+        indicator.style.display = 'none';
+    }
+    
+    console.log(`📊 Indicador atualizado: ${count} imagem(ns) carregada(s)`);
+}
 
 function setupImageUploadHandlers() {
     console.log('🔧 Configurando handlers de upload LOCAL (Base64)...');
@@ -414,8 +457,19 @@ async function uploadPendingImagesToGitHub(postSlug) {
     try {
         console.log('📤 Iniciando upload de imagens para GitHub...');
         console.log('📝 Post slug:', postSlug);
+        console.log('🔍 Debug - Estado de pendingImages:', {
+            avatar: window.pendingImages.avatar ? '✅ Presente' : '❌ Não existe',
+            cover: window.pendingImages.cover ? '✅ Presente' : '❌ Não existe',
+            internals: window.pendingImages.internals ? `${window.pendingImages.internals.length} imagens` : '❌ Array vazio'
+        });
+        
+        console.log('🔑 Verificando credenciais...');
+        console.log('   Token:', token ? '✅ Presente' : '❌ Ausente');
+        console.log('   Username:', username);
+        console.log('   Repositório:', repoName);
         
         // Garante que repositório existe
+        console.log('📦 Verificando/criando repositório...');
         await ensureGitHubRepository(token, username, repoName, apiBase);
 
         // Upload Avatar
@@ -468,6 +522,9 @@ async function uploadPendingImagesToGitHub(postSlug) {
             internals: []
         };
         
+        // Atualiza indicador visual (vai esconder o contador)
+        updateImagesLoadedIndicator();
+        
         return results;
 
     } catch (error) {
@@ -486,17 +543,18 @@ async function uploadPendingImagesToGitHub(postSlug) {
  */
 async function ensureGitHubRepository(token, username, repoName, apiBase) {
     try {
+        console.log(`   🔍 Verificando repositório ${username}/${repoName}...`);
         const response = await fetch(`${apiBase}/repos/${username}/${repoName}`, {
             headers: { 'Authorization': `token ${token}` }
         });
 
         if (response.ok) {
-            console.log(`✅ Repositório ${repoName} existe`);
+            console.log(`   ✅ Repositório ${repoName} existe e está acessível`);
             return true;
         }
 
         if (response.status === 404) {
-            console.log(`📦 Criando repositório ${repoName}...`);
+            console.log(`   📦 Repositório não encontrado, criando ${repoName}...`);
             const createResponse = await fetch(`${apiBase}/user/repos`, {
                 method: 'POST',
                 headers: {
@@ -512,13 +570,20 @@ async function ensureGitHubRepository(token, username, repoName, apiBase) {
             });
 
             if (!createResponse.ok) {
-                throw new Error('Falha ao criar repositório');
+                const errorData = await createResponse.json();
+                console.error(`   ❌ Falha ao criar repositório:`, errorData);
+                throw new Error(`Falha ao criar repositório: ${errorData.message}`);
             }
 
-            console.log('✅ Repositório criado! Aguardando inicialização...');
+            console.log('   ✅ Repositório criado com sucesso!');
+            console.log('   ⏳ Aguardando 3 segundos para inicialização...');
             await new Promise(resolve => setTimeout(resolve, 3000));
+            console.log('   ✅ Repositório pronto para uso!');
             return true;
         }
+
+        console.error(`   ❌ Erro inesperado ao verificar repositório (status ${response.status})`);
+        throw new Error(`Erro ao verificar repositório: ${response.status}`);
 
         throw new Error(`Erro ao verificar repositório: ${response.status}`);
     } catch (error) {
@@ -531,11 +596,19 @@ async function ensureGitHubRepository(token, username, repoName, apiBase) {
  * Faz upload de arquivo individual para GitHub
  */
 async function uploadFileToGitHub(token, username, repoName, apiBase, path, file) {
+    console.log(`   📁 Preparando upload: ${path}`);
+    console.log(`   📦 Arquivo:`, {
+        nome: file.name,
+        tamanho: file.size,
+        tipo: file.type
+    });
+    
     // Converte File para Base64
     const base64Content = await new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => {
             const base64 = reader.result.split(',')[1];
+            console.log(`   ✅ Arquivo convertido para Base64 (${base64.length} caracteres)`);
             resolve(base64);
         };
         reader.onerror = reject;
@@ -545,6 +618,7 @@ async function uploadFileToGitHub(token, username, repoName, apiBase, path, file
     // Verifica se arquivo já existe (para pegar SHA)
     let sha = null;
     try {
+        console.log(`   🔍 Verificando se ${path} já existe...`);
         const existingResponse = await fetch(
             `${apiBase}/repos/${username}/${repoName}/contents/${path}`,
             { headers: { 'Authorization': `token ${token}` } }
@@ -552,35 +626,40 @@ async function uploadFileToGitHub(token, username, repoName, apiBase, path, file
         if (existingResponse.ok) {
             const data = await existingResponse.json();
             sha = data.sha;
-            console.log(`  ℹ️ Arquivo ${path} já existe, atualizando...`);
+            console.log(`   ℹ️ Arquivo ${path} já existe (SHA: ${sha.substring(0, 7)}...), atualizando...`);
+        } else {
+            console.log(`   ℹ️ Arquivo ${path} não existe, criando novo...`);
         }
     } catch (error) {
-        // Arquivo não existe, ok
+        console.log(`   ℹ️ Arquivo ${path} não existe (primeira vez), criando...`);
     }
 
     // Faz upload
-    const response = await fetch(
-        `${apiBase}/repos/${username}/${repoName}/contents/${path}`,
-        {
-            method: 'PUT',
-            headers: {
-                'Authorization': `token ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                message: sha ? `Update: ${path}` : `Upload: ${path}`,
-                content: base64Content,
-                ...(sha && { sha })
-            })
-        }
-    );
+    const uploadUrl = `${apiBase}/repos/${username}/${repoName}/contents/${path}`;
+    console.log(`   📤 Enviando para GitHub: ${uploadUrl}`);
+    
+    const response = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `token ${token}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            message: sha ? `Update: ${path}` : `Upload: ${path}`,
+            content: base64Content,
+            ...(sha && { sha })
+        })
+    });
 
     if (!response.ok) {
         const error = await response.json();
-        throw new Error(`Upload failed: ${error.message}`);
+        console.error(`   ❌ Falha no upload de ${path}:`, error);
+        throw new Error(`Upload failed for ${path}: ${error.message}`);
     }
 
-    return await response.json();
+    const result = await response.json();
+    console.log(`   ✅ Upload bem-sucedido! URL: ${result.content.download_url}`);
+    return result;
 }
 
 // ======================
