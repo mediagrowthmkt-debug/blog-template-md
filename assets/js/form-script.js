@@ -19,14 +19,21 @@ function saveFormToLocalStorage() {
         if (field.type === 'button' || field.type === 'submit') return;
         if (field.id === 'aiTemplate') return; // Não salvar o template de IA
         
+        // Validação: ignora campos sem id e sem name
+        const fieldKey = field.id || field.name;
+        if (!fieldKey || fieldKey.trim() === '') {
+            console.warn('⚠️ Campo sem id/name ignorado:', field);
+            return;
+        }
+        
         if (field.type === 'checkbox') {
-            formData[field.id || field.name] = field.checked;
+            formData[fieldKey] = field.checked;
         } else if (field.name && field.name.includes('[]')) {
             // Campos múltiplos (arrays)
             if (!formData[field.name]) formData[field.name] = [];
             formData[field.name].push(field.value);
         } else {
-            formData[field.id || field.name] = field.value;
+            formData[fieldKey] = field.value;
         }
     });
     
@@ -40,24 +47,44 @@ function loadFormFromLocalStorage() {
     if (!savedData) return;
     
     try {
-        const formData = JSON.parse(savedData);
+        let formData = JSON.parse(savedData);
+        
+        // Validação e limpeza: remove chaves inválidas
+        const invalidKeys = Object.keys(formData).filter(key => !key || key.trim() === '' || key === '#');
+        if (invalidKeys.length > 0) {
+            console.warn('⚠️ Encontradas', invalidKeys.length, 'chaves corrompidas. Limpando...');
+            invalidKeys.forEach(key => delete formData[key]);
+            // Salva versão limpa
+            localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify(formData));
+        }
+        
         const form = document.getElementById('blogForm');
         
         // Restaura valores de campos simples
         Object.keys(formData).forEach(key => {
+            // Validação de segurança: ignora chaves inválidas
+            if (!key || key.trim() === '' || key === '#') {
+                console.warn('⚠️ Chave inválida ignorada:', key);
+                return;
+            }
+            
             // Pula campos array por enquanto
             if (key.includes('[]')) return;
             // Não restaurar o template de IA
             if (key === 'aiTemplate') return;
             
-            const field = form.querySelector(`#${key}`) || form.querySelector(`[name="${key}"]`);
-            
-            if (field) {
-                if (field.type === 'checkbox') {
-                    field.checked = formData[key];
-                } else {
-                    field.value = formData[key];
+            try {
+                const field = form.querySelector(`#${key}`) || form.querySelector(`[name="${key}"]`);
+                
+                if (field) {
+                    if (field.type === 'checkbox') {
+                        field.checked = formData[key];
+                    } else {
+                        field.value = formData[key];
+                    }
                 }
+            } catch (selectorError) {
+                console.warn(`⚠️ Erro ao restaurar campo "${key}":`, selectorError.message);
             }
         });
         
@@ -533,6 +560,16 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Carrega dados salvos ao carregar a página
     loadFormFromLocalStorage();
+    
+    // Função global para limpar localStorage (disponível no console)
+    window.clearBlogTemplateStorage = function() {
+        localStorage.removeItem(AUTO_SAVE_KEY);
+        console.log('✅ LocalStorage limpo! Recarregue a página.');
+        alert('LocalStorage limpo! Recarregue a página (Cmd+R ou F5)');
+    };
+    
+    console.log('💡 Para limpar o localStorage corrompido, execute no console:');
+    console.log('   clearBlogTemplateStorage()');
     
     // Auto-save em todos os campos do formulário
     form.querySelectorAll('input, textarea, select').forEach(field => {
