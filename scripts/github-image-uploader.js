@@ -136,13 +136,22 @@ async function handleAvatarUpload(file) {
             avatarInput.value = base64;
         }
 
+        // Mostra preview da imagem
+        const previewElement = document.getElementById('avatarPreview');
+        if (previewElement) {
+            previewElement.src = base64;
+            previewElement.style.display = 'block';
+            previewElement.style.animation = 'fadeIn 0.3s ease-in';
+        }
+
         // Feedback
         if (statusElement) {
-            statusElement.textContent = '✅ Pronta! Será enviada ao publicar';
-            statusElement.classList.add('upload-success');
+            statusElement.textContent = '✅ Avatar carregado! Será enviado ao publicar';
+            statusElement.style.color = '#22c55e';
+            statusElement.style.fontWeight = '600';
             
             setTimeout(() => {
-                statusElement.classList.remove('show');
+                statusElement.style.opacity = '0';
             }, 3000);
         }
 
@@ -208,12 +217,21 @@ async function handleCoverUpload(file) {
             coverInput.value = base64;
         }
 
+        // Mostra preview da imagem
+        const previewElement = document.getElementById('coverPreview');
+        if (previewElement) {
+            previewElement.src = base64;
+            previewElement.style.display = 'block';
+            previewElement.style.animation = 'fadeIn 0.3s ease-in';
+        }
+
         if (statusElement) {
-            statusElement.textContent = '✅ Pronta! Será enviada ao publicar';
-            statusElement.classList.add('upload-success');
+            statusElement.textContent = '✅ Capa carregada! Será enviada ao publicar';
+            statusElement.style.color = '#22c55e';
+            statusElement.style.fontWeight = '600';
             
             setTimeout(() => {
-                statusElement.classList.remove('show');
+                statusElement.style.opacity = '0';
             }, 3000);
         }
 

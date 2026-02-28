@@ -28,6 +28,7 @@
     
     <link rel="stylesheet" href="assets/css/form-style.css?v=1771364111">
     <script src="scripts/github-api.js?v=1771364111" defer></script>
+    <script src="scripts/github-image-uploader.js?v=20000000000" defer></script>
 </head>
 <body>
     <div class="container">
@@ -170,14 +171,20 @@ Palavra-chave Principal: sua palavra-chave
                            placeholder="https://exemplo.com/avatar.jpg">
                     
                     <!-- BOTÃO DE UPLOAD DO AVATAR -->
-                    <div style="margin-top: 10px;">
-                        <input type="file" id="avatarUploadInput" accept="image/*" style="display: none;">
-                        <button type="button" 
-                                onclick="document.getElementById('avatarUploadInput').click()" 
-                                style="padding: 10px 20px; background: #EB7A3D; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
-                            📤 Upload Avatar
-                        </button>
-                        <div id="avatarUploadStatus" style="margin-top: 8px; font-size: 0.9rem;"></div>
+                    <div style="margin-top: 10px; display: flex; align-items: center; gap: 15px;">
+                        <div>
+                            <input type="file" id="avatarUploadInput" accept="image/*" style="display: none;">
+                            <button type="button" 
+                                    onclick="document.getElementById('avatarUploadInput').click()" 
+                                    style="padding: 10px 20px; background: #EB7A3D; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                                📤 Upload Avatar
+                            </button>
+                            <div id="avatarUploadStatus" style="margin-top: 8px; font-size: 0.9rem;"></div>
+                        </div>
+                        <img id="avatarPreview" 
+                             style="display: none; width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid #EB7A3D; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" 
+                             alt="Preview do avatar">
+                    </div>
                     </div>
                 </div>
 
@@ -285,14 +292,19 @@ Palavra-chave Principal: sua palavra-chave
                            placeholder="https://exemplo.com/instalacao-granito-cozinha.jpg">
                     
                     <!-- BOTÃO DE UPLOAD DA CAPA -->
-                    <div style="margin-top: 10px;">
-                        <input type="file" id="coverUploadInput" accept="image/*" style="display: none;">
-                        <button type="button" 
-                                onclick="document.getElementById('coverUploadInput').click()" 
-                                style="padding: 10px 20px; background: #EB7A3D; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
-                            📤 Upload Capa
-                        </button>
-                        <div id="coverUploadStatus" style="margin-top: 8px; font-size: 0.9rem;"></div>
+                    <div style="margin-top: 10px; display: flex; align-items: flex-start; gap: 15px;">
+                        <div style="flex: 1;">
+                            <input type="file" id="coverUploadInput" accept="image/*" style="display: none;">
+                            <button type="button" 
+                                    onclick="document.getElementById('coverUploadInput').click()" 
+                                    style="padding: 10px 20px; background: #EB7A3D; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                                📤 Upload Capa
+                            </button>
+                            <div id="coverUploadStatus" style="margin-top: 8px; font-size: 0.9rem;"></div>
+                        </div>
+                        <img id="coverPreview" 
+                             style="display: none; max-width: 200px; height: auto; border-radius: 8px; border: 3px solid #EB7A3D; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" 
+                             alt="Preview da capa">
                     </div>
                 </div>
 
