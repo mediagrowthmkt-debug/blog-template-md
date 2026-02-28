@@ -99,7 +99,28 @@ console.log(localStorage.getItem('github_token') ? '✅ Token configurado' : '�
 
 ## 🚀 COMO USAR
 
-### **1️⃣ Upload da Imagem de Capa**
+### **1️⃣ Upload do Avatar do Autor** ⭐ NOVO!
+
+![Avatar Upload](https://via.placeholder.com/600x100/4ade80/FFFFFF?text=UPLOAD+AVATAR+-+UMA+VEZ)
+
+**🎯 Upload uma vez, usa sempre!**
+
+1. Localize o campo **"Avatar do Autor (URL)"**
+2. Clique no botão laranja **"📤 UPLOAD AVATAR"**
+3. Selecione a foto do autor do seu computador
+4. Aguarde o feedback:
+   - 🔍 **"Buscando avatar existente..."** → Verificando se já existe
+   - 📦 **"Processando imagem..."** → Otimizando
+   - 📤 **"Fazendo upload para GitHub..."** → Enviando
+   - 🟢 **"✅ Avatar salvo! Será usado em todos os posts"** → Sucesso!
+
+**💡 Comportamento inteligente:**
+- ✅ **Primeira vez:** Faz upload e salva como `avatar.jpg`
+- ✅ **Próximas vezes:** Carrega automaticamente ao abrir a página
+- ✅ **Para atualizar:** Selecione nova imagem (sobrescreve a anterior)
+- ✅ **Reutilização:** Não precisa fazer upload novamente em novos posts
+
+### **2️⃣ Upload da Imagem de Capa**
 
 ![Exemplo de botão de upload](https://via.placeholder.com/600x100/EB7A3D/FFFFFF?text=UPLOAD+IMAGEM)
 
@@ -112,7 +133,7 @@ console.log(localStorage.getItem('github_token') ? '✅ Token configurado' : '�
    - 🟢 **"✅ Upload concluído!"** → Sucesso!
 5. A URL será preenchida automaticamente no campo
 
-### **2️⃣ Upload de Imagens Internas**
+### **3️⃣ Upload de Imagens Internas**
 
 ![Exemplo de botão pequeno](https://via.placeholder.com/50x50/EB7A3D/FFFFFF?text=📤)
 
@@ -122,12 +143,13 @@ console.log(localStorage.getItem('github_token') ? '✅ Token configurado' : '�
 4. Aguarde o processamento
 5. URL preenchida automaticamente
 
-### **3️⃣ Estrutura de Armazenamento**
+### **4️⃣ Estrutura de Armazenamento**
 
 As imagens são salvas no repositório `blog-images`:
 
 ```
 blog-images/
+├── avatar.jpg                     # ⭐ Avatar do autor (único e reutilizável)
 └── posts/
     └── [slug-do-post]/
         ├── cover.jpg              # Imagem de capa
@@ -139,15 +161,23 @@ blog-images/
 **Exemplo real:**
 ```
 blog-images/
+├── avatar.jpg                     # ← Usado em TODOS os posts
 └── posts/
-    └── instalacao-granito-cozinha/
+    ├── instalacao-granito-cozinha/
+    │   ├── cover.jpg
+    │   ├── internal-1.jpg
+    │   └── internal-2.jpg
+    └── reforma-cozinha-moderna/
         ├── cover.jpg
-        ├── internal-1.jpg
-        └── internal-2.jpg
+        └── internal-1.jpg
 ```
 
 **URLs geradas:**
 ```
+# Avatar (permanente)
+https://raw.githubusercontent.com/[usuario]/blog-images/main/avatar.jpg
+
+# Imagens do post
 https://raw.githubusercontent.com/[usuario]/blog-images/main/posts/instalacao-granito-cozinha/cover.jpg
 ```
 
@@ -191,7 +221,7 @@ https://raw.githubusercontent.com/[usuario]/blog-images/main/posts/instalacao-gr
 
 ### **Componentes do Código**
 
-#### **1. github-image-uploader.js** (~380 linhas)
+#### **1. github-image-uploader.js** (~650 linhas) ⭐ ATUALIZADO
 
 ```javascript
 class GitHubImageUploader {
@@ -199,9 +229,38 @@ class GitHubImageUploader {
     
     // Métodos principais:
     uploadImage(file, postSlug, imageType)     // Upload principal
-    ensureRepository()                          // Cria repo se não existir
-    createRepository()                          // Cria novo repositório
-    optimizeImage(file)                         // Resize + compress
+    getAvatarUrl()                             // ⭐ Busca avatar existente
+    getFile(path)                              // Busca arquivo do repo
+    ensureRepository()                         // Cria repo se não existir
+    createRepository()                         // Cria novo repositório
+    optimizeImage(file)                        // Resize + compress
+}
+
+// Handlers globais:
+setupImageUploadHandlers()                     // Configura todos os botões
+loadExistingAvatar()                           // ⭐ Carrega avatar ao abrir página
+handleAvatarUpload(file)                       // ⭐ Upload específico de avatar
+handleImageUpload(file, type, input)          // Upload de imagens de posts
+```
+
+**⭐ NOVA FUNCIONALIDADE - Avatar Persistente:**
+
+```javascript
+// Ao abrir a página, busca avatar existente
+async function loadExistingAvatar() {
+    const avatarUrl = await uploader.getAvatarUrl();
+    if (avatarUrl) {
+        document.getElementById('authorAvatar').value = avatarUrl;
+        // ✅ Avatar preenchido automaticamente!
+    }
+}
+
+// Upload do avatar (com sobrescrita se existir)
+async function handleAvatarUpload(file) {
+    // 1. Busca SHA do arquivo existente (se houver)
+    // 2. Faz upload com SHA para sobrescrever
+    // 3. Salva sempre como 'avatar.jpg' na raiz
+    const url = await uploader.uploadImage(file, null, 'avatar');
 }
 ```
 
@@ -351,7 +410,50 @@ location.reload();
 2. Verifique se IDs estão corretos:
    - `coverImage` (campo da capa)
    - `coverImageUpload` (botão da capa)
+   - `authorAvatar` (campo do avatar) ⭐
+   - `avatarUpload` (botão do avatar) ⭐
 3. Limpe cache (Ctrl+Shift+Delete)
+
+---
+
+### ❓ **"Avatar não carrega automaticamente"** ⭐ NOVO
+
+**Problema:** Avatar não aparece ao abrir página
+
+**Solução:**
+1. Verifique se já fez upload do avatar antes
+2. Abra console e veja se há mensagem: `"✅ Avatar encontrado"`
+3. Verifique se o repositório `blog-images` existe
+4. Teste manualmente:
+   ```javascript
+   const uploader = initUploader();
+   uploader.getAvatarUrl().then(url => console.log(url));
+   ```
+
+---
+
+### ❓ **"Como atualizar o avatar?"** ⭐ NOVO
+
+**Problema:** Quero trocar a foto do avatar
+
+**Solução:**
+1. Clique em **"📤 UPLOAD AVATAR"** normalmente
+2. Selecione nova imagem
+3. Sistema detecta que já existe e sobrescreve automaticamente
+4. URL continua a mesma (`avatar.jpg`)
+5. ✅ Todos os posts usarão novo avatar automaticamente!
+
+---
+
+### ❓ **"Avatar aparece em todos os posts?"** ⭐ NOVO
+
+**Resposta:** SIM! 🎉
+
+- Avatar é salvo como `avatar.jpg` na raiz do repositório
+- Não é vinculado a nenhum post específico
+- URL permanente: `https://raw.githubusercontent.com/{user}/blog-images/main/avatar.jpg`
+- Aparece automaticamente em TODOS os posts (novos e antigos)
+- Para mudar, basta fazer upload de nova imagem
 
 ---
 
@@ -368,6 +470,7 @@ console.log('Uploader:', typeof GitHubImageUploader !== 'undefined' ? '✅' : '�
 
 // 3. Handlers
 console.log('Handler Capa:', document.getElementById('coverImageUpload') ? '✅' : '❌');
+console.log('Handler Avatar:', document.getElementById('avatarUpload') ? '✅' : '❌'); // ⭐
 
 // 4. Rate limit
 fetch('https://api.github.com/rate_limit', {
@@ -485,6 +588,17 @@ Em `form-style.css`:
 ---
 
 ## 📝 CHANGELOG
+
+### **v2.0.0** (27/02/2026) ⭐ MAJOR UPDATE
+- ✨ **Sistema de Avatar Persistente** - Upload uma vez, usa sempre!
+  - Avatar salvo como `avatar.jpg` na raiz do repositório
+  - Auto-carregamento ao abrir página (`loadExistingAvatar()`)
+  - Sobrescrita inteligente com SHA
+  - Reutilização automática em todos os posts
+- 🔄 Método `getAvatarUrl()` para buscar avatar existente
+- 🔄 Método `getFile()` para buscar arquivos do repo
+- 📦 Sistema completo com 650 linhas de código
+- 📖 Documentação atualizada com seção de Avatar
 
 ### **v1.0.0** (27/02/2026)
 - ✨ Sistema completo de upload implementado
