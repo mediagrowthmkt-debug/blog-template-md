@@ -17,6 +17,7 @@ function saveFormToLocalStorage() {
     // Salva todos os inputs e textareas (exceto aiTemplate)
     form.querySelectorAll('input, textarea, select').forEach(field => {
         if (field.type === 'button' || field.type === 'submit') return;
+        if (field.type === 'file') return; // NÃO salvar inputs de arquivo (segurança)
         if (field.id === 'aiTemplate') return; // Não salvar o template de IA
         
         // Validação: ignora campos sem id e sem name
@@ -77,6 +78,12 @@ function loadFormFromLocalStorage() {
                 const field = form.querySelector(`#${key}`) || form.querySelector(`[name="${key}"]`);
                 
                 if (field) {
+                    // NUNCA restaurar inputs de arquivo (type="file")
+                    if (field.type === 'file') {
+                        console.warn('⚠️ Input file ignorado (não pode ser restaurado):', key);
+                        return;
+                    }
+                    
                     if (field.type === 'checkbox') {
                         field.checked = formData[key];
                     } else {
