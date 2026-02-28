@@ -15,8 +15,10 @@ class GitHubBlogPublisher {
      * Salvar post no GitHub
      */
     async savePost(slug, htmlContent) {
-        const path = `posts/${slug}.html`;
-        const message = `Add new blog post: ${slug}`;
+        // Remove barra inicial do slug se existir (evita posts//arquivo.html)
+        const cleanSlug = slug.startsWith('/') ? slug.substring(1) : slug;
+        const path = `posts/${cleanSlug}.html`;
+        const message = `Add new blog post: ${cleanSlug}`;
         
         console.log(`📝 Salvando post no GitHub...`);
         console.log(`   Owner: ${this.owner}`);

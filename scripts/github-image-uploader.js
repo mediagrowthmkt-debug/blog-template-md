@@ -490,6 +490,9 @@ async function uploadPendingImagesToGitHub(postSlug) {
         console.log('📦 Verificando/criando repositório...');
         await ensureGitHubRepository(token, username, repoName, apiBase);
 
+        // Remove barra inicial do slug se existir (evita posts//arquivo)
+        const cleanSlug = postSlug.startsWith('/') ? postSlug.substring(1) : postSlug;
+
         // Upload Avatar
         if (window.pendingImages.avatar) {
             console.log('📤 Enviando avatar...');
@@ -507,10 +510,10 @@ async function uploadPendingImagesToGitHub(postSlug) {
             console.log('📤 Enviando capa...');
             await uploadFileToGitHub(
                 token, username, repoName, apiBase,
-                `posts/${postSlug}/cover.jpg`,
+                `posts/${cleanSlug}/cover.jpg`,
                 window.pendingImages.cover.file
             );
-            results.cover = `${rawBase}/${username}/${repoName}/main/posts/${postSlug}/cover.jpg`;
+            results.cover = `${rawBase}/${username}/${repoName}/main/posts/${cleanSlug}/cover.jpg`;
             console.log('✅ Capa enviada:', results.cover);
         }
 
@@ -521,10 +524,10 @@ async function uploadPendingImagesToGitHub(postSlug) {
                 const img = window.pendingImages.internals[i];
                 await uploadFileToGitHub(
                     token, username, repoName, apiBase,
-                    `posts/${postSlug}/internal-${i + 1}.jpg`,
+                    `posts/${cleanSlug}/internal-${i + 1}.jpg`,
                     img.file
                 );
-                const url = `${rawBase}/${username}/${repoName}/main/posts/${postSlug}/internal-${i + 1}.jpg`;
+                const url = `${rawBase}/${username}/${repoName}/main/posts/${cleanSlug}/internal-${i + 1}.jpg`;
                 results.internals.push(url);
                 console.log(`✅ Imagem interna ${i + 1} enviada:`, url);
             }
