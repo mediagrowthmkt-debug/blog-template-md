@@ -165,10 +165,26 @@ Palavra-chave Principal: sua palavra-chave
 
                 <div class="form-group">
                     <label for="authorAvatar">Avatar do Autor (URL)</label>
-                    <input type="url" 
-                           id="authorAvatar" 
-                           name="authorAvatar" 
-                           placeholder="https://exemplo.com/avatar.jpg">
+                    <div style="display: flex; gap: 12px; align-items: flex-start;">
+                        <input type="url" 
+                               id="authorAvatar" 
+                               name="authorAvatar"
+                               style="flex: 1;"
+                               placeholder="https://exemplo.com/avatar.jpg">
+                        <div style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
+                            <label for="avatarUpload" class="btn-upload" title="Fazer upload do avatar do autor para o GitHub">
+                                📤 UPLOAD AVATAR
+                                <input type="file" 
+                                       id="avatarUpload" 
+                                       accept="image/*" 
+                                       style="display: none;">
+                            </label>
+                            <small style="font-size: 0.75rem; color: #EB7A3D; font-weight: 600; text-align: center;">
+                                Clique para enviar avatar
+                            </small>
+                            <small id="avatarUploadStatus" class="upload-progress"></small>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-row">
