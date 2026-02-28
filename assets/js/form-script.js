@@ -1457,10 +1457,44 @@ async function savePostToServer(html, slug) {
         console.log('🚀 Token GitHub encontrado! Publicando automaticamente...');
         
         try {
+            // 🖼️ PASSO 1: Enviar IMAGENS primeiro (avatar, capa, internas)
+            console.log('📤 PASSO 1: Enviando imagens para GitHub...');
+            console.log('📦 window.pendingImages:', window.pendingImages);
+            
+            if (window.uploadPendingImagesToGitHub) {
+                const uploadedImages = await window.uploadPendingImagesToGitHub(slug);
+                console.log('✅ Imagens enviadas:', uploadedImages);
+                
+                // Substitui URLs Base64 pelas URLs do GitHub no HTML
+                if (uploadedImages) {
+                    if (uploadedImages.avatar) {
+                        console.log('🔄 Substituindo avatar Base64 por:', uploadedImages.avatar);
+                        html = html.replace(/src="data:image\/[^"]+avatar[^"]+"/gi, `src="${uploadedImages.avatar}"`);
+                    }
+                    
+                    if (uploadedImages.cover) {
+                        console.log('🔄 Substituindo capa Base64 por:', uploadedImages.cover);
+                        html = html.replace(/src="data:image\/[^"]+capa[^"]+"/gi, `src="${uploadedImages.cover}"`);
+                    }
+                    
+                    // Substitui imagens internas
+                    if (uploadedImages.internalImages && uploadedImages.internalImages.length > 0) {
+                        console.log('🔄 Substituindo', uploadedImages.internalImages.length, 'imagens internas');
+                        uploadedImages.internalImages.forEach((img, index) => {
+                            const pattern = new RegExp(`data:image/[^"]+interna-${index}[^"]*`, 'gi');
+                            html = html.replace(pattern, img);
+                        });
+                    }
+                }
+            } else {
+                console.warn('⚠️ uploadPendingImagesToGitHub não encontrado!');
+            }
+            
+            // 📝 PASSO 2: Enviar POST com URLs das imagens já substituídas
+            console.log('📤 PASSO 2: Enviando post para GitHub /posts/...');
             const publisher = window.initGitHubPublisher();
             
             if (publisher) {
-                console.log('📤 Enviando post para GitHub /posts/...');
                 await publisher.savePost(slug, html);
                 const publicUrl = publisher.getPublicUrl(slug);
                 
