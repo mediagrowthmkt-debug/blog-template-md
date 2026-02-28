@@ -36,7 +36,6 @@ Sistema automatizado para criar e publicar posts de blog otimizados para SEO, co
 - ✅ **Interface Visual Intuitiva** - Formulário completo para criar posts
 - ✅ **Preview em Tempo Real** - Veja antes de publicar
 - ✅ **Publicação Automatizada** - Direto no GitHub via API
-- ✅ **📤 Upload de Imagens** - Do computador direto para GitHub (NOVO!)
 - ✅ **Sistema de 3 Imagens** - Layouts adaptativos (full/left/left)
 - ✅ **Formulário de Leads** - Captura de contatos com webhook
 - ✅ **Posts Relacionados** - Carregamento dinâmico automático
@@ -49,21 +48,12 @@ Sistema automatizado para criar e publicar posts de blog otimizados para SEO, co
 
 ## 📚 DOCUMENTAÇÃO COMPLETA
 
-### 🟧 **Central de Documentação para Replicação**
-**[📂 REPLICAR PARA_OUTRO_CLIENTE/ →](🟧REPLICAR%20PARA_OUTRO_CLIENTE/)**
-
-| Guia | Descrição | Tempo | Dificuldade |
-|------|-----------|-------|-------------|
-| **[� Guia de Replicação](🟧REPLICAR%20PARA_OUTRO_CLIENTE/GUIA-REPLICACAO-CLIENTE.md)** | Setup completo para novo cliente | 30-45 min | ⭐⭐☆☆☆ |
-| **[� Upload de Imagens](🟧REPLICAR%20PARA_OUTRO_CLIENTE/UPLOAD-IMAGENS-GUIDE.md)** ⭐ | Sistema de upload para GitHub | 15 min | ⭐⭐☆☆☆ |
-| **[� Doc Completa](🟧REPLICAR%20PARA_OUTRO_CLIENTE/DOCUMENTACAO-COMPLETA.md)** | Arquitetura técnica detalhada | 2-3 horas | ⭐⭐⭐☆☆ |
-| **[❓ FAQ](🟧REPLICAR%20PARA_OUTRO_CLIENTE/FAQ-TROUBLESHOOTING.md)** | Problemas comuns e soluções | Consulta | ⭐☆☆☆☆ |
-| **[📊 Fluxogramas](🟧REPLICAR%20PARA_OUTRO_CLIENTE/FLUXOGRAMA-SISTEMA.md)** | Diagramas visuais dos fluxos | 10 min | ⭐☆☆☆☆ |
-
-### 📖 **Guias Rápidos (docs/)**
-
 | Documento | Descrição | Tempo |
 |-----------|-----------|-------|
+| **[📘 Documentação Completa](docs/DOCUMENTACAO-COMPLETA.md)** | Guia completo: arquitetura, fluxo, tudo | 30 min |
+| **[🚀 Guia de Replicação](docs/GUIA-REPLICACAO-CLIENTE.md)** | Duplicar blog para novo cliente | 15 min |
+| **[📊 Fluxograma do Sistema](docs/FLUXOGRAMA-SISTEMA.md)** | Diagramas visuais de todo o fluxo | 10 min |
+| **[❓ FAQ & Troubleshooting](docs/FAQ-TROUBLESHOOTING.md)** | Problemas comuns e soluções | 15 min |
 | **[⚡ Quick Start](docs/QUICK-START.md)** | Criar primeiro post em 5 minutos | 5 min |
 | **[📑 Índice Completo](docs/INDEX.md)** | Todos os documentos organizados | 2 min |
 

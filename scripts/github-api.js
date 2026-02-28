@@ -18,19 +18,28 @@ class GitHubBlogPublisher {
         const path = `posts/${slug}.html`;
         const message = `Add new blog post: ${slug}`;
         
+        console.log(`📝 Salvando post no GitHub...`);
+        console.log(`   Owner: ${this.owner}`);
+        console.log(`   Repo: ${this.repo}`);
+        console.log(`   Path: ${path}`);
+        console.log(`   Branch: ${this.branch}`);
+        
         try {
             // Verificar se arquivo já existe
             const existingFile = await this.getFile(path);
             
             if (existingFile) {
+                console.log('📄 Arquivo já existe, atualizando...');
                 // Atualizar arquivo existente
                 return await this.updateFile(path, htmlContent, message, existingFile.sha);
             } else {
+                console.log('📄 Criando novo arquivo...');
                 // Criar novo arquivo
                 return await this.createFile(path, htmlContent, message);
             }
         } catch (error) {
-            console.error('Erro ao salvar no GitHub:', error);
+            console.error('❌ Erro ao salvar no GitHub:', error);
+            console.error('   Detalhes completos:', error.message);
             throw error;
         }
     }
@@ -69,6 +78,8 @@ class GitHubBlogPublisher {
     async createFile(path, content, message) {
         const url = `https://api.github.com/repos/${this.owner}/${this.repo}/contents/${path}`;
         
+        console.log(`📤 PUT Request para: ${url}`);
+        
         const response = await fetch(url, {
             method: 'PUT',
             headers: this.getHeaders(),
@@ -81,10 +92,14 @@ class GitHubBlogPublisher {
 
         if (!response.ok) {
             const error = await response.json();
-            throw new Error(`GitHub API error: ${error.message}`);
+            console.error('❌ GitHub API Error:', error);
+            throw new Error(`GitHub API error: ${error.message || response.status}`);
         }
 
-        return await response.json();
+        const result = await response.json();
+        console.log('✅ Arquivo criado com sucesso!');
+        console.log('   URL:', result.content?.html_url);
+        return result;
     }
 
     /**
@@ -92,6 +107,9 @@ class GitHubBlogPublisher {
      */
     async updateFile(path, content, message, sha) {
         const url = `https://api.github.com/repos/${this.owner}/${this.repo}/contents/${path}`;
+        
+        console.log(`📤 PUT Request (UPDATE) para: ${url}`);
+        console.log(`   SHA do arquivo: ${sha}`);
         
         const response = await fetch(url, {
             method: 'PUT',
@@ -106,10 +124,14 @@ class GitHubBlogPublisher {
 
         if (!response.ok) {
             const error = await response.json();
-            throw new Error(`GitHub API error: ${error.message}`);
+            console.error('❌ GitHub API Error (UPDATE):', error);
+            throw new Error(`GitHub API error: ${error.message || response.status}`);
         }
 
-        return await response.json();
+        const result = await response.json();
+        console.log('✅ Arquivo atualizado com sucesso!');
+        console.log('   URL:', result.content?.html_url);
+        return result;
     }
 
     /**

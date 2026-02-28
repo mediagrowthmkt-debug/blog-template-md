@@ -26,9 +26,9 @@
     <link href="https://api.fontshare.com/v2/css?f[]=mazzard-h@400,700&f[]=mazzard-m@400,600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript><link href="https://api.fontshare.com/v2/css?f[]=mazzard-h@400,700&f[]=mazzard-m@400,600&display=swap" rel="stylesheet"></noscript>
     
-    <link rel="stylesheet" href="assets/css/form-style.css?v=1771364111">
-    <script src="scripts/github-api.js?v=1771364111" defer></script>
-    <script src="scripts/github-image-uploader.js?v=1771364111" defer></script>
+    <link rel="stylesheet" href="assets/css/form-style.css?v=11000000000">
+    <script src="scripts/github-api.js?v=15000000000" defer></script>
+    <script src="scripts/github-image-uploader.js?v=9000000000" defer></script>
 </head>
 <body>
     <div class="container">
@@ -107,7 +107,31 @@ Palavra-chave Principal: sua palavra-chave
                 <div id="autofillStatus" class="autofill-status"></div>
             </section>
 
-            <!-- �🧱 BLOCO 1: IDENTIDADE DO POST -->
+            <!-- 🌐 SELETOR DE IDIOMA -->
+            <section class="form-section" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%); border: 2px solid rgba(59, 130, 246, 0.3);">
+                <h2 style="color: #3b82f6;">🌐 Idioma do Blog</h2>
+                <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">
+                    Selecione o idioma principal do conteúdo. Isso afetará todos os textos automaticamente gerados (meta tags, botões, mensagens, etc.)
+                </p>
+                
+                <div class="form-group">
+                    <label for="blogLanguage" style="font-size: 1.1rem; font-weight: 600;">
+                        Idioma do Conteúdo
+                    </label>
+                    <select id="blogLanguage" 
+                            name="blogLanguage" 
+                            style="padding: 14px; font-size: 1rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: #fff; cursor: pointer;">
+                        <option value="pt-BR" selected>🇧🇷 Português (Brasil)</option>
+                        <option value="en-US">🇺🇸 English (United States)</option>
+                    </select>
+                    <small class="field-info" style="display: block; margin-top: 10px;">
+                        💡 <strong>Português:</strong> "Leia mais", "Compartilhar", "Posts Relacionados", etc.<br>
+                        💡 <strong>English:</strong> "Read more", "Share", "Related Posts", etc.
+                    </small>
+                </div>
+            </section>
+
+            <!-- 🧱 BLOCO 1: IDENTIDADE DO POST -->
             <section class="form-section">
                 <h2>🧱 BLOCO 1: Identidade do Post</h2>
                 
@@ -165,25 +189,26 @@ Palavra-chave Principal: sua palavra-chave
 
                 <div class="form-group">
                     <label for="authorAvatar">Avatar do Autor (URL)</label>
-                    <div style="display: flex; gap: 12px; align-items: flex-start;">
-                        <input type="url" 
-                               id="authorAvatar" 
-                               name="authorAvatar"
-                               style="flex: 1;"
-                               placeholder="https://exemplo.com/avatar.jpg">
-                        <div style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
-                            <label for="avatarUpload" class="btn-upload" title="Fazer upload do avatar do autor para o GitHub">
-                                📤 UPLOAD AVATAR
-                                <input type="file" 
-                                       id="avatarUpload" 
-                                       accept="image/*" 
-                                       style="display: none;">
-                            </label>
-                            <small style="font-size: 0.75rem; color: #EB7A3D; font-weight: 600; text-align: center;">
-                                Clique para enviar avatar
-                            </small>
-                            <small id="avatarUploadStatus" class="upload-progress"></small>
-                        </div>
+                    <input type="url" 
+                           id="authorAvatar" 
+                           name="authorAvatar" 
+                           placeholder="https://exemplo.com/avatar.jpg">
+                    
+                    <!-- Upload Button para Avatar -->
+                    <div style="margin-top: 10px;">
+                        <input type="file" 
+                               id="avatarUploadInput" 
+                               accept="image/*" 
+                               style="display: none;">
+                        <button type="button" 
+                                class="btn-upload" 
+                                onclick="document.getElementById('avatarUploadInput').click()">
+                            📤 Upload Avatar (Único)
+                        </button>
+                        <div id="avatarUploadStatus" style="margin-top: 8px; font-size: 0.9rem;"></div>
+                        <small style="display: block; margin-top: 5px; color: rgba(255,255,255,0.6);">
+                            💡 Faça upload UMA VEZ - será reutilizado automaticamente
+                        </small>
                     </div>
                 </div>
 
@@ -284,26 +309,24 @@ Palavra-chave Principal: sua palavra-chave
                         URL da Imagem de Capa
                         <span class="tooltip">1200x630px - Nome do arquivo com keyword</span>
                     </label>
-                    <div style="display: flex; gap: 10px; align-items: flex-start;">
-                        <input type="url" 
-                               id="coverImage" 
-                               name="coverImage" 
-                               required
-                               style="flex: 1;"
-                               placeholder="https://exemplo.com/instalacao-granito-cozinha.jpg">
-                        <div style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
-                            <label for="coverImageUpload" class="btn-upload" title="Fazer upload da imagem de capa para o GitHub">
-                                📤 UPLOAD IMAGEM
-                                <input type="file" 
-                                       id="coverImageUpload" 
-                                       accept="image/*" 
-                                       style="display: none;">
-                            </label>
-                            <small style="font-size: 0.75rem; color: #EB7A3D; font-weight: 600; text-align: center;">
-                                Clique aqui para enviar imagem do seu computador
-                            </small>
-                            <small id="coverImageUploadStatus" class="upload-progress"></small>
-                        </div>
+                    <input type="url" 
+                           id="coverImage" 
+                           name="coverImage" 
+                           required
+                           placeholder="https://exemplo.com/instalacao-granito-cozinha.jpg">
+                    
+                    <!-- Upload Button para Cover -->
+                    <div style="margin-top: 10px;">
+                        <input type="file" 
+                               id="coverUploadInput" 
+                               accept="image/*" 
+                               style="display: none;">
+                        <button type="button" 
+                                class="btn-upload" 
+                                onclick="document.getElementById('coverUploadInput').click()">
+                            📤 Upload Imagem de Capa
+                        </button>
+                        <div id="coverUploadStatus" style="margin-top: 8px; font-size: 0.9rem;"></div>
                     </div>
                 </div>
 
@@ -336,17 +359,22 @@ Palavra-chave Principal: sua palavra-chave
                         <div class="internal-image-item">
                             <input type="url" 
                                    name="internalImageUrl[]" 
-                                   placeholder="URL da imagem">
+                                   placeholder="URL da imagem"
+                                   class="internal-image-url">
                             <input type="text" 
                                    name="internalImageAlt[]" 
                                    placeholder="Alt text descritivo">
-                            <label class="btn-upload-small" title="Fazer upload desta imagem">
+                            <input type="file" 
+                                   id="internalUpload0" 
+                                   accept="image/*" 
+                                   style="display: none;"
+                                   class="internal-image-upload">
+                            <button type="button" 
+                                    class="btn-upload-small" 
+                                    onclick="document.getElementById('internalUpload0').click()"
+                                    title="Upload imagem">
                                 📤
-                                <input type="file" 
-                                       class="internalImageUpload" 
-                                       accept="image/*" 
-                                       style="display: none;">
-                            </label>
+                            </button>
                             <button type="button" class="btn-remove">✕</button>
                         </div>
                     </div>
@@ -931,6 +959,6 @@ Habilitar botões de compartilhamento? [Sim/Não]:</textarea>
         </div>
     </div>
 
-    <script src="assets/js/form-script.js?v=1771364111"></script>
+    <script src="assets/js/form-script.js?v=16000000000"></script>
 </body>
 </html>
