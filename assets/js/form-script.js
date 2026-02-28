@@ -14,243 +14,95 @@ function saveFormToLocalStorage() {
     const formData = {};
     const form = document.getElementById('blogForm');
     
-    // Salva todos os inputs e textareas (exceto aiTemplate e aiAutofillText)
+    // Salva todos os inputs e textareas (exceto aiTemplate)
     form.querySelectorAll('input, textarea, select').forEach(field => {
         if (field.type === 'button' || field.type === 'submit') return;
-        if (field.id === 'aiTemplate' || field.id === 'aiAutofillText') return; // Não salvar templates de IA
-        if (field.type === 'file') return; // Não salvar inputs de arquivo
-        
-        // Determina o identificador do campo (prefere name, depois id)
-        const fieldKey = field.name || field.id;
-        if (!fieldKey) return; // Pula campos sem identificador
+        if (field.id === 'aiTemplate') return; // Não salvar o template de IA
         
         if (field.type === 'checkbox') {
-            formData[fieldKey] = field.checked;
-        } else if (fieldKey.includes('[]')) {
+            formData[field.id || field.name] = field.checked;
+        } else if (field.name && field.name.includes('[]')) {
             // Campos múltiplos (arrays)
-            if (!formData[fieldKey]) formData[fieldKey] = [];
-            formData[fieldKey].push(field.value);
+            if (!formData[field.name]) formData[field.name] = [];
+            formData[field.name].push(field.value);
         } else {
-            formData[fieldKey] = field.value;
+            formData[field.id || field.name] = field.value;
         }
     });
     
-    // Salva data e hora do último save
-    formData['_lastSave'] = new Date().toISOString();
-    
     localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify(formData));
-    
-    // Log detalhado dos campos salvos
-    const simpleFields = Object.keys(formData).filter(k => !k.includes('[]') && !k.startsWith('_')).length;
-    const arrayFields = Object.keys(formData).filter(k => k.includes('[]')).length;
-    console.log(`💾 Auto-save executado: ${simpleFields} campos simples + ${arrayFields} campos array = ${Object.keys(formData).length - 1} total`);
-    console.log('📋 Campos salvos:', Object.keys(formData).filter(k => !k.startsWith('_')).sort());
-    
     updateAutoSaveStatus();
 }
 
 // Carrega os dados salvos do LocalStorage
 function loadFormFromLocalStorage() {
     const savedData = localStorage.getItem(AUTO_SAVE_KEY);
-    if (!savedData) {
-        console.log('ℹ️ Nenhum dado salvo encontrado');
-        return;
-    }
+    if (!savedData) return;
     
     try {
         const formData = JSON.parse(savedData);
         const form = document.getElementById('blogForm');
         
-        console.log('📥 Restaurando dados salvos...', Object.keys(formData).length, 'campos');
-        
         // Restaura valores de campos simples
         Object.keys(formData).forEach(key => {
-            // Pula campos array, metadata e templates de IA
-            if (key.includes('[]') || key.startsWith('_') || key === 'aiTemplate' || key === 'aiAutofillText') return;
+            // Pula campos array por enquanto
+            if (key.includes('[]')) return;
+            // Não restaurar o template de IA
+            if (key === 'aiTemplate') return;
             
-            // Busca por name primeiro, depois por id
-            const field = form.querySelector(`[name="${key}"]`) || form.querySelector(`#${key}`);
+            const field = form.querySelector(`#${key}`) || form.querySelector(`[name="${key}"]`);
             
             if (field) {
                 if (field.type === 'checkbox') {
                     field.checked = formData[key];
-                } else if (field.tagName === 'SELECT') {
-                    field.value = formData[key];
-                    console.log(`✅ Select restaurado: ${key} = ${formData[key]}`);
                 } else {
                     field.value = formData[key];
                 }
-            } else {
-                console.log(`⚠️ Campo não encontrado: ${key}`);
             }
         });
         
-        // Restaura campos múltiplos (arrays) com delay para garantir DOM carregado
-        setTimeout(() => {
-            Object.keys(formData).forEach(key => {
-                if (!key.includes('[]') || !Array.isArray(formData[key])) return;
+        // Restaura campos múltiplos (arrays) - usando método diferente
+        Object.keys(formData).forEach(key => {
+            if (key.includes('[]') && Array.isArray(formData[key])) {
+                // Busca todos os campos com esse name usando getAttribute
+                const allFields = Array.from(form.querySelectorAll('input')).filter(
+                    input => input.getAttribute('name') === key
+                );
                 
-                const values = formData[key].filter(v => v && v.trim() !== ''); // Remove valores vazios
-                if (values.length === 0) return;
-                
-                // Identifica o tipo de campo array
-                if (key === 'internalImageUrl[]') {
-                    restoreInternalImages(values, formData['internalImageAlt[]'] || []);
-                } else if (key === 'internalLinkUrl[]') {
-                    restoreInternalLinks(values, formData['internalLinkAnchor[]'] || []);
-                } else if (key === 'externalLinkUrl[]') {
-                    restoreExternalLinks(values, formData['externalLinkAnchor[]'] || []);
-                } else {
-                    // Outros campos array genéricos
-                    const allFields = Array.from(form.querySelectorAll(`[name="${key}"]`));
-                    values.forEach((value, index) => {
-                        if (allFields[index]) {
-                            allFields[index].value = value;
+                formData[key].forEach((value, index) => {
+                    if (allFields[index]) {
+                        allFields[index].value = value;
+                    } else {
+                        // Se não existe campo suficiente, cria novos
+                        if (key === 'internalImageUrl[]' && index > 0) {
+                            document.getElementById('addInternalImage').click();
+                            setTimeout(() => {
+                                const newFields = Array.from(form.querySelectorAll('input')).filter(
+                                    input => input.getAttribute('name') === key
+                                );
+                                if (newFields[index]) newFields[index].value = value;
+                            }, 100);
                         }
-                    });
-                }
-            });
-            
-            console.log('✅ Dados restaurados com sucesso!');
-            
-            // Mostra mensagem de restauração
-            if (formData['_lastSave']) {
-                const lastSaveDate = new Date(formData['_lastSave']);
-                const timeAgo = getTimeAgo(lastSaveDate);
-                updateAutoSaveStatus(`✅ Restaurado (salvo ${timeAgo})`);
-            } else {
-                updateAutoSaveStatus('✅ Dados restaurados');
+                    }
+                });
             }
-        }, 500);
+        });
         
+        console.log('✅ Dados carregados do auto-save');
+        updateAutoSaveStatus('Dados restaurados');
     } catch (error) {
         console.error('❌ Erro ao carregar dados salvos:', error);
     }
 }
 
-// Função auxiliar para restaurar imagens internas
-function restoreInternalImages(urls, alts) {
-    const container = document.getElementById('internalImagesContainer');
-    if (!container) return;
-    
-    // Limpa campos existentes vazios
-    const existingItems = container.querySelectorAll('.internal-image-item');
-    existingItems.forEach(item => {
-        const urlInput = item.querySelector('[name="internalImageUrl[]"]');
-        if (!urlInput || !urlInput.value) {
-            item.remove();
-        }
-    });
-    
-    urls.forEach((url, index) => {
-        if (!url || url.trim() === '') return;
-        
-        const existingFields = container.querySelectorAll('[name="internalImageUrl[]"]');
-        
-        if (existingFields[index]) {
-            // Atualiza campo existente
-            existingFields[index].value = url;
-            const altInput = existingFields[index].closest('.internal-image-item')?.querySelector('[name="internalImageAlt[]"]');
-            if (altInput && alts[index]) altInput.value = alts[index];
-        } else {
-            // Adiciona novo campo
-            const addBtn = document.getElementById('addInternalImage');
-            if (addBtn) {
-                addBtn.click();
-                setTimeout(() => {
-                    const newFields = container.querySelectorAll('[name="internalImageUrl[]"]');
-                    const newField = newFields[newFields.length - 1];
-                    if (newField) {
-                        newField.value = url;
-                        const altInput = newField.closest('.internal-image-item')?.querySelector('[name="internalImageAlt[]"]');
-                        if (altInput && alts[index]) altInput.value = alts[index];
-                    }
-                }, 100);
-            }
-        }
-    });
-    
-    console.log(`✅ ${urls.length} imagens internas restauradas`);
-}
-
-// Função auxiliar para restaurar links internos
-function restoreInternalLinks(urls, anchors) {
-    urls.forEach((url, index) => {
-        if (!url || url.trim() === '') return;
-        
-        const container = document.getElementById('internalLinksContainer');
-        if (!container) return;
-        
-        const existingFields = container.querySelectorAll('[name="internalLinkUrl[]"]');
-        
-        if (existingFields[index]) {
-            existingFields[index].value = url;
-            const anchorInput = existingFields[index].closest('.link-item')?.querySelector('[name="internalLinkAnchor[]"]');
-            if (anchorInput && anchors[index]) anchorInput.value = anchors[index];
-        } else {
-            const addBtn = document.getElementById('addInternalLink');
-            if (addBtn) addBtn.click();
-        }
-    });
-    
-    console.log(`✅ ${urls.length} links internos restaurados`);
-}
-
-// Função auxiliar para restaurar links externos
-function restoreExternalLinks(urls, anchors) {
-    urls.forEach((url, index) => {
-        if (!url || url.trim() === '') return;
-        
-        const container = document.getElementById('externalLinksContainer');
-        if (!container) return;
-        
-        const existingFields = container.querySelectorAll('[name="externalLinkUrl[]"]');
-        
-        if (existingFields[index]) {
-            existingFields[index].value = url;
-            const anchorInput = existingFields[index].closest('.link-item')?.querySelector('[name="externalLinkAnchor[]"]');
-            if (anchorInput && anchors[index]) anchorInput.value = anchors[index];
-        } else {
-            const addBtn = document.getElementById('addExternalLink');
-            if (addBtn) addBtn.click();
-        }
-    });
-    
-    console.log(`✅ ${urls.length} links externos restaurados`);
-}
-
-// Função auxiliar para calcular tempo decorrido
-function getTimeAgo(date) {
-    const seconds = Math.floor((new Date() - date) / 1000);
-    
-    if (seconds < 60) return 'agora mesmo';
-    if (seconds < 3600) return `há ${Math.floor(seconds / 60)} min`;
-    if (seconds < 86400) return `há ${Math.floor(seconds / 3600)}h`;
-    return `há ${Math.floor(seconds / 86400)} dias`;
-}
-
 // Auto-save com debounce (aguarda 2 segundos sem digitação)
 function scheduleAutoSave() {
-    const statusDiv = document.getElementById('autoSaveStatus');
-    
-    // Mostra "Salvando..." enquanto aguarda
-    if (statusDiv) {
-        statusDiv.textContent = '⏳ Salvando...';
-        statusDiv.classList.add('saving');
-        statusDiv.style.opacity = '1';
-    }
-    
     if (autoSaveTimeout) {
         clearTimeout(autoSaveTimeout);
     }
     
     autoSaveTimeout = setTimeout(() => {
         saveFormToLocalStorage();
-        
-        // Remove classe de "salvando"
-        if (statusDiv) {
-            statusDiv.classList.remove('saving');
-        }
     }, 2000); // 2 segundos
 }
 
@@ -262,98 +114,38 @@ function updateAutoSaveStatus(customMessage = null) {
     const now = new Date();
     const timeString = now.toLocaleTimeString('pt-BR', { 
         hour: '2-digit', 
-        minute: '2-digit',
-        second: '2-digit'
+        minute: '2-digit' 
     });
     
     statusDiv.textContent = customMessage || `💾 Salvo às ${timeString}`;
-    statusDiv.classList.remove('saving');
     statusDiv.style.opacity = '1';
     
-    // Mantém visível por mais tempo
+    // Fade out após 3 segundos
     setTimeout(() => {
-        statusDiv.style.opacity = '0.7';
-    }, 5000);
+        statusDiv.style.opacity = '0.5';
+    }, 3000);
 }
 
 // Limpa o formulário e o LocalStorage
 function clearFormData() {
     if (confirm('⚠️ Tem certeza que deseja limpar TODOS os campos? Esta ação não pode ser desfeita.')) {
-        const form = document.getElementById('blogForm');
-        
         // Limpa o formulário
-        form.reset();
-        
-        // Remove campos dinâmicos extras (mantém apenas 1 de cada)
-        const internalImagesContainer = document.getElementById('internalImagesContainer');
-        if (internalImagesContainer) {
-            const items = internalImagesContainer.querySelectorAll('.internal-image-item');
-            items.forEach((item, index) => {
-                if (index > 0) item.remove(); // Remove todos exceto o primeiro
-            });
-            // Limpa o primeiro
-            const firstUrlInput = internalImagesContainer.querySelector('[name="internalImageUrl[]"]');
-            const firstAltInput = internalImagesContainer.querySelector('[name="internalImageAlt[]"]');
-            if (firstUrlInput) firstUrlInput.value = '';
-            if (firstAltInput) firstAltInput.value = '';
-        }
-        
-        // Limpa links internos
-        const internalLinksContainer = document.getElementById('internalLinksContainer');
-        if (internalLinksContainer) {
-            const items = internalLinksContainer.querySelectorAll('.link-item');
-            items.forEach((item, index) => {
-                if (index > 0) item.remove();
-            });
-            // Limpa o primeiro
-            const firstUrlInput = internalLinksContainer.querySelector('[name="internalLinkUrl[]"]');
-            const firstAnchorInput = internalLinksContainer.querySelector('[name="internalLinkAnchor[]"]');
-            if (firstUrlInput) firstUrlInput.value = '';
-            if (firstAnchorInput) firstAnchorInput.value = '';
-        }
-        
-        // Limpa links externos
-        const externalLinksContainer = document.getElementById('externalLinksContainer');
-        if (externalLinksContainer) {
-            const items = externalLinksContainer.querySelectorAll('.link-item');
-            items.forEach((item, index) => {
-                if (index > 0) item.remove();
-            });
-            // Limpa o primeiro
-            const firstUrlInput = externalLinksContainer.querySelector('[name="externalLinkUrl[]"]');
-            const firstAnchorInput = externalLinksContainer.querySelector('[name="externalLinkAnchor[]"]');
-            if (firstUrlInput) firstUrlInput.value = '';
-            if (firstAnchorInput) firstAnchorInput.value = '';
-        }
+        document.getElementById('blogForm').reset();
         
         // Limpa o LocalStorage
         localStorage.removeItem(AUTO_SAVE_KEY);
         
-        // Limpa cache de imagens pendentes
-        if (window.pendingImages) {
-            window.pendingImages = {
-                avatar: null,
-                cover: null,
-                internals: []
-            };
-        }
-        
         // Feedback visual
         const statusDiv = document.getElementById('autoSaveStatus');
         if (statusDiv) {
-            statusDiv.textContent = '🗑️ Todos os campos e cache limpos';
-            statusDiv.classList.remove('saving');
+            statusDiv.textContent = '🗑️ Campos limpos';
             statusDiv.style.opacity = '1';
             setTimeout(() => {
-                statusDiv.textContent = '';
                 statusDiv.style.opacity = '0';
-            }, 3000);
+            }, 2000);
         }
         
-        console.log('🗑️ Formulário, cache e dados dinâmicos limpos');
-        
-        // Scroll para o topo
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        console.log('🗑️ Formulário e cache limpos');
     }
 }
 
@@ -844,9 +636,19 @@ function setupDynamicFields() {
         const container = document.getElementById('internalImagesContainer');
         const newItem = document.createElement('div');
         newItem.className = 'internal-image-item';
+        
+        // Gera um ID único para cada botão de upload
+        const uniqueId = 'internalUpload_' + Date.now();
+        
         newItem.innerHTML = `
             <input type="url" name="internalImageUrl[]" placeholder="URL da imagem">
             <input type="text" name="internalImageAlt[]" placeholder="Alt text descritivo">
+            <input type="file" class="internal-image-upload" accept="image/*" style="display: none;" id="${uniqueId}">
+            <button type="button" 
+                    onclick="document.getElementById('${uniqueId}').click()" 
+                    style="padding: 8px 16px; background: #EB7A3D; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; white-space: nowrap;">
+                📤 Upload
+            </button>
             <button type="button" class="btn-remove">✕</button>
         `;
         container.appendChild(newItem);
@@ -955,28 +757,6 @@ function insertTag(textarea, tag) {
 function showPreview() {
     const formData = collectFormData();
     
-    // ===================================================================
-    // INJETA IMAGENS DO pendingImages NO PREVIEW (AVATAR E CAPA)
-    // ===================================================================
-    if (window.pendingImages) {
-        console.log('🖼️ Injetando imagens do pendingImages no preview...');
-        
-        if (window.pendingImages.avatar && window.pendingImages.avatar.base64) {
-            formData.authorAvatar = window.pendingImages.avatar.base64;
-            console.log('✅ Avatar do pendingImages injetado no preview (Base64)');
-        }
-        
-        if (window.pendingImages.cover && window.pendingImages.cover.base64) {
-            formData.coverImage = window.pendingImages.cover.base64;
-            console.log('✅ Capa do pendingImages injetada no preview (Base64)');
-        }
-        
-        console.log('📊 Estado final das imagens no preview:', {
-            authorAvatar: formData.authorAvatar ? (formData.authorAvatar.startsWith('data:') ? 'Base64' : 'URL') : 'não definido',
-            coverImage: formData.coverImage ? (formData.coverImage.startsWith('data:') ? 'Base64' : 'URL') : 'não definido'
-        });
-    }
-    
     // Debug: mostra quantas imagens internas foram coletadas
     console.log('📸 Imagens Internas no Preview:', formData.internalImages);
     console.log('🔗 URLs das imagens:', formData.internalImages?.map(img => img.url) || []);
@@ -1004,8 +784,9 @@ function generateLeadFormHtml(data) {
         return '';
     }
     
-    // Usa idioma selecionado pelo usuário
-    const isEnglish = data.language === 'en-US';
+    // Detecta idioma baseado no conteúdo
+    const contentText = (data.h1Title || '') + ' ' + (data.contentBody || '');
+    const isEnglish = /\b(the|and|for|with|your|home|how|what|why|best|guide|tips)\b/i.test(contentText);
     
     // Textos por idioma
     const i18n = isEnglish ? {
@@ -1047,15 +828,11 @@ function generateLeadFormHtml(data) {
 }
 
 function generateFullPreviewPage(data) {
-    // Debug de imagens e links
+    // Debug de imagens
     console.log('🎨 Gerando preview com dados:', {
         totalImagens: data.internalImages?.length || 0,
-        imagens: data.internalImages,
-        internalLinks: data.internalLinks,
-        externalLinks: data.externalLinks
+        imagens: data.internalImages
     });
-    console.log('🔗 Links Internos no Preview:', data.internalLinks);
-    console.log('🌐 Links Externos no Preview:', data.externalLinks);
     
     // Processa o conteúdo e distribui as imagens ao longo dele
     let contentWithImages = data.contentBody || '<p>Conteúdo do post será exibido aqui...</p>';
@@ -1142,16 +919,16 @@ function generateFullPreviewPage(data) {
     }
     
     return `<!DOCTYPE html>
-<html lang="${data.language || 'pt-BR'}">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${data.language === 'en-US' ? 'Preview:' : 'Pré-visualização:'} ${data.h1Title || (data.language === 'en-US' ? 'New Post' : 'Novo Post')}</title>
+    <title>Pré-visualização: ${data.h1Title || 'Novo Post'}</title>
     <link rel="stylesheet" href="assets/css/blog-post.css">
     <style>
         /* Banner de Preview */
         body::before {
-            content: "${data.language === 'en-US' ? '👁️ PREVIEW MODE - This is the exact layout of the published post' : '👁️ MODO PREVIEW - Este é o layout exato do post publicado'}";
+            content: "👁️ MODO PREVIEW - Este é o layout exato do post publicado";
             display: block;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -1505,12 +1282,12 @@ function generateFullPreviewPage(data) {
                 <div class="author-info">
                     <img src="${data.authorAvatar || 'https://via.placeholder.com/100'}" alt="${data.author || 'Autor'}" class="author-avatar">
                     <div>
-                        <span class="author-name">${data.author || (data.language === 'en-US' ? 'Author' : 'Autor')}</span>
-                        <time datetime="${data.datePublishedISO || new Date().toISOString()}" class="publish-date">${data.datePublishedFormatted || new Date().toLocaleDateString(data.language === 'en-US' ? 'en-US' : 'pt-BR')}</time>
+                        <span class="author-name">${data.author || 'Autor'}</span>
+                        <time datetime="${data.datePublishedISO || new Date().toISOString()}" class="publish-date">${data.datePublishedFormatted || new Date().toLocaleDateString('pt-BR')}</time>
                     </div>
                 </div>
                 <div class="post-actions">
-                    <button class="share-btn" aria-label="${data.language === 'en-US' ? 'Share' : 'Compartilhar'}">🔗 ${data.language === 'en-US' ? 'Share' : 'Compartilhar'}</button>
+                    <button class="share-btn" aria-label="Compartilhar">🔗 Compartilhar</button>
                 </div>
             </div>
         </header>
@@ -1542,54 +1319,10 @@ function generateFullPreviewPage(data) {
         
         ${generateLeadFormHtml(data)}
 
-        <!-- LINKS (RANKEAMENTO REAL) -->
-        ${(data.internalLinks && data.internalLinks.length > 0) || (data.externalLinks && data.externalLinks.length > 0) ? `
-        <section class="post-links" style="margin: 40px 0; padding: 30px; background: rgba(235, 122, 61, 0.05); border-left: 4px solid #EB7A3D; border-radius: 8px;">
-            <h3 style="color: #EB7A3D; margin: 0 0 20px 0; font-size: 1.3rem;">${data.language === 'en-US' ? '🔗 Relevant Links' : '🔗 Links Relevantes'}</h3>
-            
-            ${data.internalLinks && data.internalLinks.length > 0 ? `
-            <div style="margin-bottom: ${data.externalLinks && data.externalLinks.length > 0 ? '25px' : '0'};">
-                <h4 style="color: rgba(255,255,255,0.8); font-size: 1.1rem; margin: 0 0 12px 0;">${data.language === 'en-US' ? '📌 Internal Links' : '📌 Links Internos'}</h4>
-                <ul style="list-style: none; padding: 0; margin: 0;">
-                    ${data.internalLinks.map(link => `
-                        <li style="margin-bottom: 10px;">
-                            <a href="${link.url}" 
-                               style="color: #EB7A3D; text-decoration: none; font-weight: 500; transition: all 0.3s ease;"
-                               onmouseover="this.style.textDecoration='underline'; this.style.color='#ff8c52';"
-                               onmouseout="this.style.textDecoration='none'; this.style.color='#EB7A3D';">
-                                ${link.anchor || link.url}
-                            </a>
-                        </li>
-                    `).join('')}
-                </ul>
-            </div>
-            ` : ''}
-            
-            ${data.externalLinks && data.externalLinks.length > 0 ? `
-            <div>
-                <h4 style="color: rgba(255,255,255,0.8); font-size: 1.1rem; margin: 0 0 12px 0;">${data.language === 'en-US' ? '🌐 External Links' : '🌐 Links Externos'}</h4>
-                <ul style="list-style: none; padding: 0; margin: 0;">${data.externalLinks.map(link => `
-                        <li style="margin-bottom: 10px;">
-                            <a href="${link.url}" 
-                               target="_blank"
-                               rel="noopener noreferrer"
-                               style="color: rgba(255,255,255,0.7); text-decoration: none; font-weight: 500; transition: all 0.3s ease;"
-                               onmouseover="this.style.textDecoration='underline'; this.style.color='#fff';"
-                               onmouseout="this.style.textDecoration='none'; this.style.color='rgba(255,255,255,0.7)';">
-                                ${link.anchor || link.url} ↗
-                            </a>
-                        </li>
-                    `).join('')}
-                </ul>
-            </div>
-            ` : ''}
-        </section>
-        ` : ''}
-
         <!-- TAGS -->
         <footer class="post-footer">
             <div class="tags">
-                <strong>${data.language === 'en-US' ? 'Tags:' : 'Tags:'}</strong>
+                <strong>Tags:</strong>
                 ${data.tagsArray ? data.tagsArray.map(tag => `<span class="tag">#${tag}</span>`).join(' ') : ''}
             </div>
         </footer>
@@ -1597,9 +1330,9 @@ function generateFullPreviewPage(data) {
 
     <!-- RELATED POSTS -->
     <aside class="related-posts">
-        <h2>${data.language === 'en-US' ? 'Related Posts' : 'Posts Relacionados'}</h2>
+        <h2>${/\b(the|and|for|with|your|home|how|what|why|best|guide|tips)\b/i.test(data.h1Title || '') ? 'Related Posts' : 'Posts Relacionados'}</h2>
         <div class="related-grid" id="relatedGrid">
-            <p style="text-align: center; color: rgba(255,255,255,0.5);">${data.language === 'en-US' ? 'Loading...' : 'Carregando...'}</p>
+            <p style="text-align: center; color: rgba(255,255,255,0.5);">Loading...</p>
         </div>
     </aside>
 
@@ -1609,12 +1342,12 @@ function generateFullPreviewPage(data) {
             <img src="../assets/images/logo-mediagrowth.webp" alt="MediaGrowth" class="footer-logo">
             <p class="footer-tagline">Blog desenvolvido pela MediaGrowth</p>
             <p class="footer-subtitle">Feito com <span class="footer-love">♥</span> e tecnologia</p>
-            <p class="footer-copyright">© ${new Date().getFullYear()} MediaGrowth. ${data.language === 'en-US' ? 'All rights reserved.' : 'Todos os direitos reservados.'}</p>
+            <p class="footer-copyright">© ${new Date().getFullYear()} MediaGrowth. Todos os direitos reservados.</p>
         </div>
     </footer>
 
     <!-- BACK TO TOP -->
-    <button id="backToTop" class="back-to-top" aria-label="${data.language === 'en-US' ? 'Back to top' : 'Voltar ao topo'}">↑</button>
+    <button id="backToTop" class="back-to-top" aria-label="Voltar ao topo">↑</button>
 
     <!-- SCRIPTS -->
     <script src="assets/js/blog-post.js"></script>
@@ -1683,49 +1416,7 @@ async function savePostToServer(html, slug) {
             const publisher = window.initGitHubPublisher();
             
             if (publisher) {
-                // ============================================
-                // PASSO 1: UPLOAD DE IMAGENS PARA GITHUB
-                // ============================================
-                console.log('📤 PASSO 1: Fazendo upload das imagens pendentes...');
-                
-                if (typeof window.uploadPendingImagesToGitHub === 'function') {
-                    try {
-                        const imageUrls = await window.uploadPendingImagesToGitHub(slug);
-                        console.log('✅ Imagens enviadas:', imageUrls);
-                        
-                        // Substitui URLs Base64 pelas URLs do GitHub no HTML
-                        if (imageUrls.avatar && html.includes(window.pendingImages.avatar?.base64)) {
-                            console.log('🔄 Substituindo avatar Base64 por URL GitHub...');
-                            html = html.replace(new RegExp(window.pendingImages.avatar.base64.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), imageUrls.avatar);
-                        }
-                        
-                        if (imageUrls.cover && window.pendingImages.cover?.base64) {
-                            console.log('🔄 Substituindo capa Base64 por URL GitHub...');
-                            html = html.replace(new RegExp(window.pendingImages.cover.base64.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), imageUrls.cover);
-                        }
-                        
-                        if (imageUrls.internals && imageUrls.internals.length > 0) {
-                            console.log('🔄 Substituindo imagens internas Base64 por URLs GitHub...');
-                            imageUrls.internals.forEach((url, index) => {
-                                if (url && window.pendingImages.internals[index]?.base64) {
-                                    html = html.replace(new RegExp(window.pendingImages.internals[index].base64.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), url);
-                                }
-                            });
-                        }
-                        
-                        console.log('✅ URLs substituídas no HTML!');
-                    } catch (imageError) {
-                        console.error('⚠️ Erro ao fazer upload de imagens:', imageError);
-                        console.warn('⚠️ Continuando com URLs Base64 (imagens não aparecerão após refresh)');
-                    }
-                } else {
-                    console.warn('⚠️ Função uploadPendingImagesToGitHub não encontrada');
-                }
-                
-                // ============================================
-                // PASSO 2: UPLOAD DO HTML PARA GITHUB
-                // ============================================
-                console.log('📤 PASSO 2: Enviando HTML do post para GitHub /posts/...');
+                console.log('📤 Enviando post para GitHub /posts/...');
                 await publisher.savePost(slug, html);
                 const publicUrl = publisher.getPublicUrl(slug);
                 
@@ -1868,13 +1559,7 @@ function collectFormData() {
         ...formData.get('secondaryKeywords').split(',').map(k => k.trim()).filter(k => k)
     ].join(', ');
     
-    // Remove barra inicial do slug se houver
-    let slug = formData.get('slug');
-    if (slug && slug.startsWith('/')) {
-        slug = slug.substring(1);
-        console.log('⚠️ Barra inicial removida do slug:', slug);
-    }
-    
+    const slug = formData.get('slug');
     const siteUrl = formData.get('siteUrl').replace(/\/$/, '');
     const categorySlug = generateSlug(formData.get('category'));
     
@@ -1937,9 +1622,6 @@ function collectFormData() {
         enableComments: formData.get('enableComments') === 'on',
         enableShare: formData.get('enableShare') === 'on',
         
-        // Idioma
-        language: formData.get('blogLanguage') || 'pt-BR',
-        
         // URLs
         canonicalUrl: `${siteUrl}/blog/${slug}`,
         blogUrl: `${siteUrl}/blog`,
@@ -1949,32 +1631,6 @@ function collectFormData() {
 
 async function generatePostHtml(data) {
     console.log('📥 Gerando HTML do post (mesmo formato do preview)...');
-    
-    // ===================================================================
-    // INJETA IMAGENS DO pendingImages NO DATA (AVATAR E CAPA)
-    // ===================================================================
-    if (window.pendingImages) {
-        console.log('🖼️ Injetando imagens do pendingImages no HTML...');
-        
-        if (window.pendingImages.avatar && window.pendingImages.avatar.base64) {
-            data.authorAvatar = window.pendingImages.avatar.base64;
-            console.log('✅ Avatar do pendingImages injetado (Base64)');
-        }
-        
-        if (window.pendingImages.cover && window.pendingImages.cover.base64) {
-            data.coverImage = window.pendingImages.cover.base64;
-            console.log('✅ Capa do pendingImages injetada (Base64)');
-        }
-        
-        console.log('📊 Estado final das imagens:', {
-            authorAvatar: data.authorAvatar ? (data.authorAvatar.startsWith('data:') ? 'Base64' : 'URL') : 'não definido',
-            coverImage: data.coverImage ? (data.coverImage.startsWith('data:') ? 'Base64' : 'URL') : 'não definido'
-        });
-    }
-    
-    console.log('🔗 DEBUG - Links recebidos em generatePostHtml:');
-    console.log('  - internalLinks:', data.internalLinks);
-    console.log('  - externalLinks:', data.externalLinks);
     
     // Sanitiza URLs para prevenir JavaScript injection
     const sanitizeUrl = (url) => {
@@ -2080,8 +1736,9 @@ async function generatePostHtml(data) {
         `<span class="tag">#${escapeHtml(tag)}</span>`
     ).join(' ') : '';
     
-    // Usa idioma selecionado pelo usuário
-    const isEnglish = data.language === 'en-US';
+    // Detecta idioma baseado no conteúdo
+    const contentText = (data.h1Title || '') + ' ' + (data.contentBody || '');
+    const isEnglish = /\b(the|and|for|with|your|home|how|what|why|best|guide|tips)\b/i.test(contentText);
     
     // Textos por idioma
     const i18n = isEnglish ? {
@@ -2165,7 +1822,7 @@ async function generatePostHtml(data) {
     
     // HTML COMPLETO - IGUAL AO PREVIEW
     return `<!DOCTYPE html>
-<html lang="${data.language || 'pt-BR'}">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -3355,16 +3012,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function addInternalImageField(url, alt) {
         const container = document.getElementById('internalImagesContainer');
-        const index = container.children.length;
         const div = document.createElement('div');
         div.className = 'internal-image-item';
         div.innerHTML = `
-            <input type="url" name="internalImageUrl[]" value="${url}" placeholder="URL da imagem" class="internal-image-url">
+            <input type="url" name="internalImageUrl[]" value="${url}" placeholder="URL da imagem">
             <input type="text" name="internalImageAlt[]" value="${alt}" placeholder="Alt text descritivo">
-            <input type="file" id="internalUpload${index}" accept="image/*" style="display: none;" class="internal-image-upload">
-            <button type="button" class="btn-upload-small" onclick="document.getElementById('internalUpload${index}').click()" title="Upload imagem">
-                📤
-            </button>
             <button type="button" class="btn-remove" onclick="this.parentElement.remove()">✕</button>
         `;
         container.appendChild(div);
