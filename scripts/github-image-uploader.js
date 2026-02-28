@@ -308,9 +308,10 @@ class GitHubImageUploader {
 
 /**
  * Inicializa o uploader com token do localStorage
+ * @param {boolean} showPrompt - Se deve mostrar prompt para username (padrão: false)
  * @returns {GitHubImageUploader|null}
  */
-function initUploader() {
+function initUploader(showPrompt = false) {
     const token = localStorage.getItem('github_token');
     
     if (!token) {
@@ -319,13 +320,21 @@ function initUploader() {
         return null;
     }
 
-    // Extrai username do token ou usa padrão
-    // Idealmente deveria ser configurado separadamente
-    const username = localStorage.getItem('github_username') || 
-                     prompt('Digite seu username do GitHub:');
+    // Busca username do localStorage
+    let username = localStorage.getItem('github_username');
     
-    if (username) {
-        localStorage.setItem('github_username', username);
+    // Se não existir E showPrompt for true, pergunta
+    if (!username && showPrompt) {
+        username = prompt('Digite seu username do GitHub:');
+        if (username) {
+            localStorage.setItem('github_username', username);
+        }
+    }
+    
+    // Se ainda não tiver username, retorna null
+    if (!username) {
+        console.warn('⚠️ Username do GitHub não configurado. Configure via botão "⚙️ Configurar GitHub API"');
+        return null;
     }
 
     return new GitHubImageUploader(token, username);
@@ -392,8 +401,12 @@ function setupImageUploadHandlers() {
  * Carrega avatar existente do GitHub
  */
 async function loadExistingAvatar() {
-    const uploader = initUploader();
-    if (!uploader) return;
+    // Não mostra prompt ao carregar página (showPrompt = false)
+    const uploader = initUploader(false);
+    if (!uploader) {
+        console.log('ℹ️ Configure username via botão "⚙️ Configurar GitHub API" para auto-carregar avatar');
+        return;
+    }
 
     const avatarInput = document.getElementById('authorAvatar');
     const statusElement = document.getElementById('avatarUploadStatus');
@@ -436,9 +449,10 @@ async function loadExistingAvatar() {
  * @param {File} file - Arquivo de imagem
  */
 async function handleAvatarUpload(file) {
-    const uploader = initUploader();
+    // Mostra prompt se necessário (showPrompt = true)
+    const uploader = initUploader(true);
     if (!uploader) {
-        alert('❌ Token do GitHub não configurado!\n\nConfigure com:\nlocalStorage.setItem("github_token", "SEU_TOKEN")');
+        alert('❌ Configuração incompleta!\n\n1. Configure o Token via botão "⚙️ Configurar GitHub API"\n2. Ou configure manualmente:\n   - localStorage.setItem("github_token", "SEU_TOKEN")\n   - localStorage.setItem("github_username", "SEU_USERNAME")');
         return;
     }
 
@@ -515,9 +529,10 @@ async function handleAvatarUpload(file) {
  * @param {HTMLElement} targetInput - Campo de input de destino
  */
 async function handleImageUpload(file, imageType, targetInput) {
-    const uploader = initUploader();
+    // Mostra prompt se necessário (showPrompt = true)
+    const uploader = initUploader(true);
     if (!uploader) {
-        alert('❌ Token do GitHub não configurado!\n\nConfigure com:\nlocalStorage.setItem("github_token", "SEU_TOKEN")');
+        alert('❌ Configuração incompleta!\n\n1. Configure o Token via botão "⚙️ Configurar GitHub API"\n2. Ou configure manualmente:\n   - localStorage.setItem("github_token", "SEU_TOKEN")\n   - localStorage.setItem("github_username", "SEU_USERNAME")');
         return;
     }
 
