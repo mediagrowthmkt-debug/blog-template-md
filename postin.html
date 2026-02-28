@@ -275,15 +275,18 @@ Palavra-chave Principal: sua palavra-chave
                                required
                                style="flex: 1;"
                                placeholder="https://exemplo.com/instalacao-granito-cozinha.jpg">
-                        <div style="display: flex; flex-direction: column; gap: 5px;">
-                            <label for="coverImageUpload" class="btn-upload" title="Fazer upload da imagem de capa">
-                                📤 Upload
+                        <div style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
+                            <label for="coverImageUpload" class="btn-upload" title="Fazer upload da imagem de capa para o GitHub">
+                                📤 UPLOAD IMAGEM
                                 <input type="file" 
                                        id="coverImageUpload" 
                                        accept="image/*" 
                                        style="display: none;">
                             </label>
-                            <small id="coverImageUploadStatus" style="font-size: 0.75rem; color: #888;"></small>
+                            <small style="font-size: 0.75rem; color: #EB7A3D; font-weight: 600; text-align: center;">
+                                Clique aqui para enviar imagem do seu computador
+                            </small>
+                            <small id="coverImageUploadStatus" class="upload-progress"></small>
                         </div>
                     </div>
                 </div>

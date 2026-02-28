@@ -3007,6 +3007,13 @@ document.addEventListener('DOMContentLoaded', function() {
         div.innerHTML = `
             <input type="url" name="internalImageUrl[]" value="${url}" placeholder="URL da imagem">
             <input type="text" name="internalImageAlt[]" value="${alt}" placeholder="Alt text descritivo">
+            <label class="btn-upload-small" title="Fazer upload desta imagem">
+                📤
+                <input type="file" 
+                       class="internalImageUpload" 
+                       accept="image/*" 
+                       style="display: none;">
+            </label>
             <button type="button" class="btn-remove" onclick="this.parentElement.remove()">✕</button>
         `;
         container.appendChild(div);
