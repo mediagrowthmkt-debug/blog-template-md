@@ -15,6 +15,7 @@
 4. [Estrutura de Arquivos](#estrutura-de-arquivos)
 5. [Páginas Principais](#páginas-principais)
 6. [Sistema de Imagens](#sistema-de-imagens)
+   - 📤 **[NOVO: Upload Automático de Imagens](UPLOAD-IMAGENS-GUIDE.md)**
 7. [Formulário de Captura de Leads](#formulário-de-captura-de-leads)
 8. [Posts Relacionados](#posts-relacionados)
 9. [SEO e Meta Tags](#seo-e-meta-tags)
