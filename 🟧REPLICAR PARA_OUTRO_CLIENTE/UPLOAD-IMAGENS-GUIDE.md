@@ -1,6 +1,8 @@
 # 📤 GUIA COMPLETO - SISTEMA DE UPLOAD DE IMAGENS
 
-> **Sistema automatizado de upload de imagens para GitHub com otimização e repositório dedicado**
+> **Sistema automatizado de upload IMEDIATO de imagens para GitHub com otimização e repositório dedicado**
+
+**⭐ VERSÃO 4.0 - UPLOAD IMEDIATO (01/03/2026)**
 
 ---
 
@@ -10,31 +12,47 @@
 2. [Requisitos](#requisitos)
 3. [Configuração Inicial](#configuração-inicial)
 4. [Como Usar](#como-usar)
-5. [Arquitetura do Sistema](#arquitetura-do-sistema)
-6. [Troubleshooting](#troubleshooting)
-7. [Replicação para Clientes](#replicação-para-clientes)
+5. [Estrutura de Armazenamento](#estrutura-de-armazenamento)
+6. [Arquitetura do Sistema](#arquitetura-do-sistema)
+7. [Troubleshooting](#troubleshooting)
+8. [Replicação para Clientes](#replicação-para-clientes)
 
 ---
 
 ## 🎯 VISÃO GERAL
 
 ### **O que é?**
-Sistema que permite fazer upload de imagens **diretamente do computador** para o GitHub, sem necessidade de hospedar em serviços externos.
+Sistema v4.0 que permite fazer upload **IMEDIATO** de imagens para o GitHub no momento da seleção - sem esperar pela publicação do post!
+
+### **🆕 NOVO na v4.0: Upload Imediato!**
+```
+ANTES (v1-v3):
+[Selecionar Imagem] → [Armazena Base64] → [Publicar Post] → [Upload GitHub]
+                                                                    ↑
+                                              Problema: Post fica sem imagem até fazer upload
+
+AGORA (v4.0):
+[Selecionar Imagem] → [Upload IMEDIATO GitHub] → [URL já disponível] → [Publicar Post]
+                              ↑
+                    Solução: Imagem já está no GitHub antes da publicação!
+```
 
 ### **Funcionalidades**
-✅ Upload direto do computador para GitHub  
+✅ **Upload IMEDIATO** ao selecionar imagem (não espera publicação)  
 ✅ Otimização automática (resize + compressão)  
 ✅ Repositório dedicado (`blog-images`) criado automaticamente  
-✅ Organização por slug do post  
-✅ Preview visual antes de publicar  
+✅ **Organização por POST** (cada post tem sua pasta)  
+✅ Preview visual usa URL do GitHub (real)  
 ✅ Feedback de progresso em tempo real  
+✅ URLs definitivas no HTML publicado  
 
 ### **Vantagens**
 - 🆓 **Gratuito:** Usa GitHub como CDN
-- ⚡ **Rápido:** Imagens otimizadas (max 1920x1080, 85% quality)
+- ⚡ **Imediato:** Imagem vai para GitHub ao selecionar
 - 🔒 **Seguro:** Controle total via GitHub API
-- 📁 **Organizado:** Estrutura clara por post
+- 📁 **Organizado:** Cada post tem sua pasta de imagens
 - 🌐 **Global:** CDN do GitHub entrega rápido mundialmente
+- ✅ **Confiável:** URL do GitHub funciona em preview E produção
 
 ---
 
@@ -99,39 +117,42 @@ console.log(localStorage.getItem('github_token') ? '✅ Token configurado' : '�
 
 ## 🚀 COMO USAR
 
-### **1️⃣ Upload do Avatar do Autor** ⭐ NOVO!
+### **1️⃣ Upload do Avatar do Autor**
 
-![Avatar Upload](https://via.placeholder.com/600x100/4ade80/FFFFFF?text=UPLOAD+AVATAR+-+UMA+VEZ)
+![Avatar Upload](https://via.placeholder.com/600x100/4ade80/FFFFFF?text=UPLOAD+AVATAR)
 
-**🎯 Upload uma vez, usa sempre!**
+**🎯 Cada post tem seu próprio avatar!**
 
 1. Localize o campo **"Avatar do Autor (URL)"**
-2. Clique no botão laranja **"📤 UPLOAD AVATAR"**
+2. Clique no botão **"📤 UPLOAD AVATAR"**
 3. Selecione a foto do autor do seu computador
 4. Aguarde o feedback:
-   - 🔍 **"Buscando avatar existente..."** → Verificando se já existe
-   - 📦 **"Processando imagem..."** → Otimizando
-   - 📤 **"Fazendo upload para GitHub..."** → Enviando
-   - 🟢 **"✅ Avatar salvo! Será usado em todos os posts"** → Sucesso!
+   - � **"Enviando para GitHub..."** → Fazendo upload
+   - 🟢 **"Avatar enviado!"** → Sucesso!
+5. URL é preenchida automaticamente no campo
 
-**💡 Comportamento inteligente:**
-- ✅ **Primeira vez:** Faz upload e salva como `avatar.jpg`
-- ✅ **Próximas vezes:** Carrega automaticamente ao abrir a página
-- ✅ **Para atualizar:** Selecione nova imagem (sobrescreve a anterior)
-- ✅ **Reutilização:** Não precisa fazer upload novamente em novos posts
+**💡 Comportamento (v4.0):**
+- ✅ **Upload IMEDIATO** ao selecionar a imagem
+- ✅ Avatar é salvo na pasta do post: `posts/{slug}/avatar.jpg`
+- ✅ Cada post tem SEU PRÓPRIO avatar (não sobrescreve outros)
+- ✅ Imagem otimizada (max 400x400, 90% quality)
 
 ### **2️⃣ Upload da Imagem de Capa**
 
 ![Exemplo de botão de upload](https://via.placeholder.com/600x100/EB7A3D/FFFFFF?text=UPLOAD+IMAGEM)
 
 1. Localize o campo **"Imagem Principal (Cover)"**
-2. Clique no botão laranja **"📤 UPLOAD IMAGEM"**
+2. Clique no botão **"📤 UPLOAD IMAGEM"**
 3. Selecione a imagem do seu computador
 4. Aguarde o feedback:
-   - 🟠 **"Processando imagem..."** → Otimizando
-   - 🟠 **"Fazendo upload..."** → Enviando para GitHub
-   - 🟢 **"✅ Upload concluído!"** → Sucesso!
-5. A URL será preenchida automaticamente no campo
+   - 🟠 **"Enviando para GitHub..."** → Upload em progresso
+   - 🟢 **"Capa enviada!"** → Sucesso!
+5. A URL do GitHub é preenchida automaticamente no campo
+
+**💡 Comportamento (v4.0):**
+- ✅ Upload IMEDIATO ao selecionar
+- ✅ Salva em: `posts/{slug}/cover.jpg`
+- ✅ Otimizada: max 1200x630, 85% quality (ideal para OG/sharing)
 
 ### **3️⃣ Upload de Imagens Internas**
 
@@ -140,52 +161,67 @@ console.log(localStorage.getItem('github_token') ? '✅ Token configurado' : '�
 1. Em cada campo de **"Imagens Internas"**
 2. Clique no botão pequeno **📤** (ao lado do botão remover)
 3. Selecione a imagem
-4. Aguarde o processamento
+4. Aguarde o feedback: **"Enviando..."** → **"Enviada!"**
 5. URL preenchida automaticamente
 
-### **4️⃣ Estrutura de Armazenamento**
+**💡 Comportamento (v4.0):**
+- ✅ Upload IMEDIATO ao selecionar
+- ✅ Salva em: `posts/{slug}/image-1.jpg`, `image-2.jpg`, `image-3.jpg`
+- ✅ Otimizada: max 1920x1080, 85% quality
 
-As imagens são salvas no repositório `blog-images`:
+---
+
+## 📁 ESTRUTURA DE ARMAZENAMENTO
+
+### **v4.0 - Cada Post com Sua Pasta**
+
+As imagens são organizadas POR POST no repositório `blog-images`:
 
 ```
 blog-images/
-├── avatar.jpg                     # ⭐ Avatar do autor (único e reutilizável)
 └── posts/
-    └── [slug-do-post]/
-        ├── cover.jpg              # Imagem de capa
-        ├── internal-1.jpg         # 1ª imagem interna
-        ├── internal-2.jpg         # 2ª imagem interna
-        └── internal-3.jpg         # 3ª imagem interna
+    ├── meu-primeiro-post/
+    │   ├── avatar.jpg        # Avatar do autor DESTE post
+    │   ├── cover.jpg         # Imagem de capa
+    │   ├── image-1.jpg       # 1ª imagem interna
+    │   ├── image-2.jpg       # 2ª imagem interna
+    │   └── image-3.jpg       # 3ª imagem interna
+    │
+    ├── segundo-post-legal/
+    │   ├── avatar.jpg        # Avatar (pode ser diferente!)
+    │   ├── cover.jpg
+    │   └── image-1.jpg
+    │
+    └── guia-completo-seo/
+        ├── avatar.jpg
+        ├── cover.jpg
+        └── image-1.jpg
+```
+
+### **URLs Geradas**
+
+```
+https://raw.githubusercontent.com/{usuario}/blog-images/main/posts/{slug}/avatar.jpg
+https://raw.githubusercontent.com/{usuario}/blog-images/main/posts/{slug}/cover.jpg
+https://raw.githubusercontent.com/{usuario}/blog-images/main/posts/{slug}/image-1.jpg
 ```
 
 **Exemplo real:**
 ```
-blog-images/
-├── avatar.jpg                     # ← Usado em TODOS os posts
-└── posts/
-    ├── instalacao-granito-cozinha/
-    │   ├── cover.jpg
-    │   ├── internal-1.jpg
-    │   └── internal-2.jpg
-    └── reforma-cozinha-moderna/
-        ├── cover.jpg
-        └── internal-1.jpg
+https://raw.githubusercontent.com/mediagrowthmkt-debug/blog-images/main/posts/trafego-pago-empresas-guia-completo/cover.jpg
 ```
 
-**URLs geradas:**
-```
-# Avatar (permanente)
-https://raw.githubusercontent.com/[usuario]/blog-images/main/avatar.jpg
+### **⚠️ IMPORTANTE: Slug é Obrigatório!**
 
-# Imagens do post
-https://raw.githubusercontent.com/[usuario]/blog-images/main/posts/instalacao-granito-cozinha/cover.jpg
-```
+O sistema usa o **slug do post** para criar a pasta. Se o slug não estiver preenchido, usa "post" como padrão.
+
+**DICA:** Preencha o título primeiro (o slug é gerado automaticamente), DEPOIS faça upload das imagens.
 
 ---
 
-## 🏗️ ARQUITETURA DO SISTEMA
+## 🏗️ ARQUITETURA DO SISTEMA (v4.0)
 
-### **Fluxo de Upload**
+### **Fluxo de Upload IMEDIATO**
 
 ```
 ┌─────────────────┐
@@ -196,6 +232,12 @@ https://raw.githubusercontent.com/[usuario]/blog-images/main/posts/instalacao-gr
          ▼
 ┌─────────────────┐
 │  FileReader API │  ← Lê arquivo local
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Preview LOCAL   │  ← Mostra preview instantâneo
+│ (ObjectURL)     │     (enquanto faz upload)
 └────────┬────────┘
          │
          ▼
@@ -211,143 +253,147 @@ https://raw.githubusercontent.com/[usuario]/blog-images/main/posts/instalacao-gr
          ▼
 ┌─────────────────┐
 │  GitHub API     │  ← PUT /repos/{owner}/{repo}/contents/{path}
+│  IMEDIATO!      │     Upload acontece AGORA, não no publish!
 └────────┬────────┘
          │
          ▼
 ┌─────────────────┐
-│  URL Retornada  │  ← Preenche campo automaticamente
+│  URL GitHub     │  ← Preenche campo automaticamente
+│  Definitiva!    │     Preview atualiza com URL real
 └─────────────────┘
 ```
 
-### **Componentes do Código**
+### **Arquivos do Sistema**
 
-#### **1. github-image-uploader.js** (~650 linhas) ⭐ ATUALIZADO
-
-```javascript
-class GitHubImageUploader {
-    constructor(token, username, repoName = 'blog-images') { ... }
-    
-    // Métodos principais:
-    uploadImage(file, postSlug, imageType)     // Upload principal
-    getAvatarUrl()                             // ⭐ Busca avatar existente
-    getFile(path)                              // Busca arquivo do repo
-    ensureRepository()                         // Cria repo se não existir
-    createRepository()                         // Cria novo repositório
-    optimizeImage(file)                        // Resize + compress
-}
-
-// Handlers globais:
-setupImageUploadHandlers()                     // Configura todos os botões
-loadExistingAvatar()                           // ⭐ Carrega avatar ao abrir página
-handleAvatarUpload(file)                       // ⭐ Upload específico de avatar
-handleImageUpload(file, type, input)          // Upload de imagens de posts
+```
+projeto/
+├── postin.html                          # Interface com botões de upload
+├── scripts/
+│   └── github-image-uploader.js         # Core v4.0 (~500 linhas)
+├── assets/
+│   ├── js/
+│   │   └── form-script.js               # Lógica de formulário
+│   └── css/
+│       └── form-style.css               # Estilos dos botões
 ```
 
-**⭐ NOVA FUNCIONALIDADE - Avatar Persistente:**
+### **Componentes do Código (v4.0)**
 
+#### **1. github-image-uploader.js** (~500 linhas) ⭐ v4.0
+
+**Variáveis Globais:**
 ```javascript
-// Ao abrir a página, busca avatar existente
-async function loadExistingAvatar() {
-    const avatarUrl = await uploader.getAvatarUrl();
-    if (avatarUrl) {
-        document.getElementById('authorAvatar').value = avatarUrl;
-        // ✅ Avatar preenchido automaticamente!
-    }
-}
+var IMAGE_REPO_NAME = 'blog-images';  // Nome do repositório de imagens
+var API_BASE = 'https://api.github.com';
+var RAW_BASE = 'https://raw.githubusercontent.com';
 
-// Upload do avatar (com sobrescrita se existir)
-async function handleAvatarUpload(file) {
-    // 1. Busca SHA do arquivo existente (se houver)
-    // 2. Faz upload com SHA para sobrescrever
-    // 3. Salva sempre como 'avatar.jpg' na raiz
-    const url = await uploader.uploadImage(file, null, 'avatar');
-}
+// URLs das imagens já enviadas (para referência)
+window.uploadedImageUrls = {
+    avatar: null,
+    cover: null,
+    internals: []
+};
 ```
 
-**Otimizações aplicadas:**
-- Max width: 1920px
-- Max height: 1080px
-- Quality: 85%
-- Formato: JPEG
-
-#### **2. form-script.js** (handlers)
-
+**Funções Principais:**
 ```javascript
-// Configuração dos eventos
-function setupImageUploadHandlers() {
-    // Botão de capa
-    document.getElementById('coverImageUpload')?.addEventListener('change', ...);
-    
-    // Botões de imagens internas (delegação)
-    document.addEventListener('change', (e) => {
-        if (e.target.classList.contains('internalImageUpload')) { ... }
-    });
-}
+// Credenciais
+async function getGitHubCredentials()      // Busca token e username
 
-// Upload individual
-async function handleImageUpload(file, type, targetInput) {
-    // 1. Validação
-    // 2. Criação do uploader
-    // 3. Upload
-    // 4. Preenchimento do campo
-    // 5. Feedback
-}
+// Repositório
+async function ensureImageRepository()     // Cria repo se não existir
+
+// Processamento
+async function optimizeImage(file, maxW, maxH, quality)  // Resize + compress
+async function blobToBase64(blob)          // Converte para Base64
+
+// Upload
+async function uploadImageToGitHub(token, user, path, blob)  // Upload real
+
+// Handlers (upload IMEDIATO ao selecionar arquivo)
+async function handleAvatarUpload(file)           // Avatar → posts/{slug}/avatar.jpg
+async function handleCoverUpload(file)            // Capa → posts/{slug}/cover.jpg
+async function handleInternalImageUpload(file, input, index)  // Internas → posts/{slug}/image-{n}.jpg
+
+// Setup
+function setupImageUploadHandlers()        // Configura event listeners
+function updateImagesLoadedIndicator()     // Atualiza contador UI
+function getUploadedImageUrls()            // Retorna URLs já enviadas
+```
+
+**Otimizações por Tipo de Imagem:**
+| Tipo | Max Width | Max Height | Quality |
+|------|-----------|------------|---------|
+| Avatar | 400px | 400px | 90% |
+| Cover | 1200px | 630px | 85% |
+| Internal | 1920px | 1080px | 85% |
+
+#### **2. postin.html** (Inputs)
+
+IDs importantes para os handlers:
+```html
+<!-- Avatar -->
+<input type="url" id="authorAvatar">
+<input type="file" id="avatarUploadInput" class="hidden">
+
+<!-- Capa -->
+<input type="url" id="coverImage">
+<input type="file" id="coverUploadInput" class="hidden">
+
+<!-- Imagens Internas (dinâmicas) -->
+<div class="internal-image-item">
+  <input type="url" name="internalImageUrl[]">
+  <input type="file" class="internal-image-upload hidden">
+</div>
 ```
 
 #### **3. form-style.css** (estilos)
 
 ```css
-/* Botão principal (capa) */
+/* Botão principal (capa/avatar) */
 .btn-upload {
     background: linear-gradient(135deg, #EB7A3D 0%, #d4692e 100%);
     box-shadow: 0 4px 12px rgba(235, 122, 61, 0.3);
     text-transform: uppercase;
-    /* + animações hover */
 }
 
 /* Botão pequeno (internas) */
 .btn-upload-small {
     border: 2px solid #EB7A3D;
     background: rgba(235, 122, 61, 0.15);
-    /* + tooltip hover */
 }
 
-/* Estados de feedback */
-.upload-progress { color: #EB7A3D; animation: pulse; }
-.upload-success { color: #4ade80; }
-.upload-error { color: #ef4444; animation: shake; }
+/* Status de upload */
+.upload-status.show { display: block; }
 ```
 
 ### **GitHub API Endpoints Utilizados**
 
-#### **1. Criar Repositório**
+#### **1. Buscar Username**
 ```http
-POST https://api.github.com/user/repos
+GET https://api.github.com/user
 Authorization: token {GITHUB_TOKEN}
-Content-Type: application/json
-
-{
-  "name": "blog-images",
-  "description": "Armazenamento de imagens do blog",
-  "private": false,
-  "auto_init": true
-}
 ```
 
-#### **2. Upload de Arquivo**
+#### **2. Verificar/Criar Repositório**
+```http
+GET https://api.github.com/repos/{owner}/blog-images
+POST https://api.github.com/user/repos  (se não existir)
+```
+
+#### **3. Upload de Arquivo (com suporte a update)**
 ```http
 PUT https://api.github.com/repos/{owner}/blog-images/contents/posts/{slug}/{filename}
 Authorization: token {GITHUB_TOKEN}
 Content-Type: application/json
 
 {
-  "message": "Upload: {filename}",
-  "content": "{BASE64_CONTENT}"
+  "message": "Upload: posts/{slug}/{filename}",
+  "content": "{BASE64_CONTENT}",
+  "branch": "main",
+  "sha": "{SHA_IF_UPDATE}"  // Opcional: para sobrescrever arquivo existente
 }
 ```
-
-#### **3. Verificar Repositório**
-```http
 GET https://api.github.com/repos/{owner}/blog-images
 Authorization: token {GITHUB_TOKEN}
 ```
@@ -408,56 +454,47 @@ location.reload();
 **Solução:**
 1. Abra console (F12) e procure erros
 2. Verifique se IDs estão corretos:
+   - `authorAvatar` (campo do avatar)
+   - `avatarUploadInput` (input file do avatar)
    - `coverImage` (campo da capa)
-   - `coverImageUpload` (botão da capa)
-   - `authorAvatar` (campo do avatar) ⭐
-   - `avatarUpload` (botão do avatar) ⭐
+   - `coverUploadInput` (input file da capa)
+   - `input[name="internalImageUrl[]"]` (campos de imagens internas)
+   - `.internal-image-upload` (inputs file das internas)
 3. Limpe cache (Ctrl+Shift+Delete)
 
 ---
 
-### ❓ **"Avatar não carrega automaticamente"** ⭐ NOVO
+### ❓ **"Imagens vão para pasta errada / 'post'"**
 
-**Problema:** Avatar não aparece ao abrir página
-
-**Solução:**
-1. Verifique se já fez upload do avatar antes
-2. Abra console e veja se há mensagem: `"✅ Avatar encontrado"`
-3. Verifique se o repositório `blog-images` existe
-4. Teste manualmente:
-   ```javascript
-   const uploader = initUploader();
-   uploader.getAvatarUrl().then(url => console.log(url));
-   ```
-
----
-
-### ❓ **"Como atualizar o avatar?"** ⭐ NOVO
-
-**Problema:** Quero trocar a foto do avatar
+**Problema:** Slug não está preenchido no momento do upload
 
 **Solução:**
-1. Clique em **"📤 UPLOAD AVATAR"** normalmente
-2. Selecione nova imagem
-3. Sistema detecta que já existe e sobrescreve automaticamente
-4. URL continua a mesma (`avatar.jpg`)
-5. ✅ Todos os posts usarão novo avatar automaticamente!
+1. **SEMPRE preencha o título ANTES** de fazer upload das imagens
+2. O slug é gerado automaticamente do título
+3. Verifique se o campo `#slug` existe e tem valor
+
+**Verificar:**
+```javascript
+// No console
+document.getElementById('slug').value
+// Deve mostrar algo como "meu-post-titulo"
+```
 
 ---
 
-### ❓ **"Avatar aparece em todos os posts?"** ⭐ NOVO
+### ❓ **"Avatar sobrescrevendo outros posts"**
 
-**Resposta:** SIM! 🎉
+**NÃO é mais um problema na v4.0!**
 
-- Avatar é salvo como `avatar.jpg` na raiz do repositório
-- Não é vinculado a nenhum post específico
-- URL permanente: `https://raw.githubusercontent.com/{user}/blog-images/main/avatar.jpg`
-- Aparece automaticamente em TODOS os posts (novos e antigos)
-- Para mudar, basta fazer upload de nova imagem
+Na v4.0, cada post tem sua própria pasta:
+- Post A: `posts/post-a/avatar.jpg`
+- Post B: `posts/post-b/avatar.jpg`
+
+São arquivos SEPARADOS. Não há sobrescrita entre posts!
 
 ---
 
-### ✅ **Verificar Estado do Sistema**
+### ✅ **Verificar Estado do Sistema v4.0**
 
 Execute no console:
 
@@ -465,14 +502,16 @@ Execute no console:
 // 1. Token
 console.log('Token:', localStorage.getItem('github_token') ? '✅' : '❌');
 
-// 2. Classe uploader
-console.log('Uploader:', typeof GitHubImageUploader !== 'undefined' ? '✅' : '❌');
+// 2. Username
+console.log('Username:', localStorage.getItem('github_username') || '(será detectado automaticamente)');
 
-// 3. Handlers
-console.log('Handler Capa:', document.getElementById('coverImageUpload') ? '✅' : '❌');
-console.log('Handler Avatar:', document.getElementById('avatarUpload') ? '✅' : '❌'); // ⭐
+// 3. Slug atual
+console.log('Slug:', document.getElementById('slug')?.value || '❌ VAZIO');
 
-// 4. Rate limit
+// 4. URLs já enviadas
+console.log('Imagens enviadas:', window.uploadedImageUrls);
+
+// 5. Rate limit
 fetch('https://api.github.com/rate_limit', {
     headers: { 'Authorization': `token ${localStorage.getItem('github_token')}` }
 })
@@ -484,65 +523,82 @@ fetch('https://api.github.com/rate_limit', {
 
 ## 🔄 REPLICAÇÃO PARA CLIENTES
 
-### **CHECKLIST DE CONFIGURAÇÃO**
+### **CHECKLIST DE CONFIGURAÇÃO (v4.0)**
 
 ```markdown
 - [ ] 1. Copiar arquivos:
-      - scripts/github-image-uploader.js
-      - Trechos de assets/js/form-script.js (handlers)
-      - Estilos de assets/css/form-style.css
-      - HTML de postin.html (botões)
+      - scripts/github-image-uploader.js (v4.0)
+      - assets/js/form-script.js
+      - assets/css/form-style.css
+      - postin.html (com estrutura de inputs correta)
 
-- [ ] 2. Gerar token do cliente:
+- [ ] 2. Verificar IDs no postin.html:
+      - #authorAvatar (input url)
+      - #avatarUploadInput (input file)
+      - #coverImage (input url)
+      - #coverUploadInput (input file)
+      - input[name="internalImageUrl[]"] (inputs url)
+      - .internal-image-upload (inputs file)
+
+- [ ] 3. Gerar token do cliente:
       - GitHub Settings → Developer settings → Personal access tokens
       - Scope: repo (full control)
 
-- [ ] 3. Configurar token no navegador do cliente:
+- [ ] 4. Configurar token no navegador do cliente:
       localStorage.setItem('github_token', 'TOKEN_AQUI');
 
-- [ ] 4. Testar upload:
-      - Imagem de capa
-      - Imagem interna
-      - Verificar repositório blog-images criado
+- [ ] 5. Testar upload (IMPORTANTE: Preencher título ANTES!):
+      - Upload de avatar → verifica pasta posts/{slug}/avatar.jpg
+      - Upload de capa → verifica pasta posts/{slug}/cover.jpg
+      - Upload de imagem interna → verifica pasta posts/{slug}/image-1.jpg
 
-- [ ] 5. Documentar para o cliente:
+- [ ] 6. Verificar se imagens aparecem na produção:
+      - Criar post de teste
+      - Publicar
+      - Verificar se imagens carregam na URL final
+
+- [ ] 7. Documentar para o cliente:
       - Como gerar novo token se expirar
-      - Onde encontrar imagens (GitHub → blog-images)
-      - Como excluir imagens antigas
+      - Onde encontrar imagens (GitHub → blog-images/posts/)
+      - IMPORTANTE: Preencher título ANTES de fazer upload!
 ```
 
 ### **PERSONALIZAÇÃO POR CLIENTE**
 
 #### **Mudar Nome do Repositório**
 
-Em `github-image-uploader.js`:
+Em `github-image-uploader.js` (linha ~8):
 ```javascript
-// Linha ~10
-class GitHubImageUploader {
-    constructor(token, username, repoName = 'imagens-cliente') { // ← Mude aqui
-        this.token = token;
-        this.username = username;
-        this.repoName = repoName;
-    }
-}
+var IMAGE_REPO_NAME = 'imagens-cliente';  // ← Mude aqui
 ```
 
 #### **Mudar Estrutura de Pastas**
 
-Em `github-image-uploader.js`, método `uploadImage`:
+Em `github-image-uploader.js`, dentro das funções de handle:
 ```javascript
-// Linha ~60
-const path = `assets/${postSlug}/${filename}`; // ← Mude estrutura aqui
+// handleAvatarUpload (~linha 230)
+var filePath = 'assets/' + postSlug + '/avatar.jpg';  // ← Mude estrutura
+
+// handleCoverUpload (~linha 295)
+var filePath = 'assets/' + postSlug + '/cover.jpg';  // ← Mude estrutura
+
+// handleInternalImageUpload (~linha 360)
+var filePath = 'assets/' + postSlug + '/image-' + index + '.jpg';  // ← Mude estrutura
 ```
 
 #### **Ajustar Otimização**
 
-Em `github-image-uploader.js`, método `optimizeImage`:
+Em `github-image-uploader.js`, dentro de cada handler:
+
 ```javascript
-// Linhas ~150-155
-const MAX_WIDTH = 1920;   // ← Ajuste
-const MAX_HEIGHT = 1080;  // ← Ajuste
-const QUALITY = 0.85;     // ← Ajuste (0.0 a 1.0)
+// Avatar - mais quadrado, menor
+var optimizedBlob = await optimizeImage(file, 400, 400, 0.9);  // ← Ajuste
+
+// Capa - formato OG/sharing
+var optimizedBlob = await optimizeImage(file, 1200, 630, 0.85);  // ← Ajuste
+
+// Internas - alta qualidade
+var optimizedBlob = await optimizeImage(file, 1920, 1080, 0.85);  // ← Ajuste
 ```
 
 #### **Cores dos Botões**
@@ -589,15 +645,25 @@ Em `form-style.css`:
 
 ## 📝 CHANGELOG
 
-### **v2.0.0** (27/02/2026) ⭐ MAJOR UPDATE
-- ✨ **Sistema de Avatar Persistente** - Upload uma vez, usa sempre!
-  - Avatar salvo como `avatar.jpg` na raiz do repositório
-  - Auto-carregamento ao abrir página (`loadExistingAvatar()`)
-  - Sobrescrita inteligente com SHA
-  - Reutilização automática em todos os posts
+### **v4.0.0** (01/03/2026) ⭐ MAJOR UPDATE - UPLOAD IMEDIATO
+- 🚀 **UPLOAD IMEDIATO** - Imagem vai para GitHub AO SELECIONAR
+  - Não espera mais pela publicação do post
+  - Preview usa URL real do GitHub
+  - Posts publicados já têm URLs corretas
+- 📁 **Organização por Post** - Cada post tem sua própria pasta
+  - Avatar: `posts/{slug}/avatar.jpg` (NÃO sobrescreve outros posts!)
+  - Capa: `posts/{slug}/cover.jpg`
+  - Internas: `posts/{slug}/image-1.jpg`, `image-2.jpg`, `image-3.jpg`
+- ⚡ **Código refatorado** - ~500 linhas, sem classes, ES5 compatível
+- 🔧 **Seletor de internas corrigido** - `input[name="internalImageUrl[]"]`
+- 📊 **Indicador de imagens** - Mostra quantas imagens foram enviadas
+- 🎨 **Preview local instantâneo** - Mostra imagem enquanto faz upload
+
+### **v2.0.0** (27/02/2026)
+- ✨ **Sistema de Avatar Persistente** (REMOVIDO na v4.0)
+  - Avatar era compartilhado entre todos os posts
+  - Na v4.0 cada post tem seu próprio avatar
 - 🔄 Método `getAvatarUrl()` para buscar avatar existente
-- 🔄 Método `getFile()` para buscar arquivos do repo
-- 📦 Sistema completo com 650 linhas de código
 - 📖 Documentação atualizada com seção de Avatar
 
 ### **v1.0.0** (27/02/2026)

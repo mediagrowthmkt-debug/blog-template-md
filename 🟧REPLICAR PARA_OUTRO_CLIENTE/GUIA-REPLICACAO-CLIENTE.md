@@ -1,9 +1,11 @@
 # 🚀 GUIA RÁPIDO: REPLICAR BLOG PARA NOVO CLIENTE
 
 **Tempo estimado:** 30-45 minutos  
-**Dificuldade:** ⭐⭐☆☆☆ (Intermediário)
+**Dificuldade:** ⭐⭐☆☆☆ (Intermediário)  
+**Versão:** 4.0 (Upload Imediato)
 
-> 📤 **NOVO:** Sistema de upload de imagens para GitHub disponível!  
+> 📤 **v4.0:** Sistema de upload IMEDIATO de imagens para GitHub!  
+> Imagens são enviadas ao selecionar, não no momento da publicação.  
 > Veja o guia completo em: **[UPLOAD-IMAGENS-GUIDE.md](UPLOAD-IMAGENS-GUIDE.md)**
 
 ---
@@ -174,9 +176,9 @@ Edite: `assets/js/form-script.js`
 
 ---
 
-### FASE 5: CONFIGURAR UPLOAD DE IMAGENS (5 min) 📤
+### FASE 5: CONFIGURAR UPLOAD DE IMAGENS v4.0 (5 min) 📤
 
-> **IMPORTANTE:** Sistema que permite ao cliente fazer upload de imagens diretamente do computador para o GitHub
+> **IMPORTANTE:** Sistema de upload IMEDIATO - imagens vão para GitHub ao selecionar!
 
 #### **5.1. Gerar Token para o Cliente**
 
@@ -200,13 +202,26 @@ Edite: `assets/js/form-script.js`
    location.reload();
    ```
 
-#### **5.3. Testar Sistema**
+#### **5.3. Testar Sistema (v4.0)**
 
+⚠️ **IMPORTANTE:** Preencher TÍTULO do post ANTES de fazer upload das imagens!
+
+- [ ] Cliente preenche o **TÍTULO** do post (slug é gerado automaticamente)
 - [ ] Cliente clica em **"📤 UPLOAD IMAGEM"**
 - [ ] Seleciona uma imagem do computador
-- [ ] Aguarda mensagem: **"✅ Upload concluído!"**
-- [ ] URL preenchida automaticamente
-- [ ] Verifica repositório `blog-images` criado no GitHub
+- [ ] Aguarda mensagem: **"Capa enviada!"** (verde)
+- [ ] URL do GitHub preenchida automaticamente
+- [ ] Verifica repositório `blog-images/posts/{slug}/` no GitHub
+
+**Estrutura de Pastas (v4.0):**
+```
+blog-images/
+└── posts/
+    └── {slug-do-post}/
+        ├── avatar.jpg    ← Cada post tem seu avatar
+        ├── cover.jpg     ← Imagem de capa
+        └── image-{n}.jpg ← Imagens internas
+```
 
 📖 **Guia completo:** [UPLOAD-IMAGENS-GUIDE.md](UPLOAD-IMAGENS-GUIDE.md)
 

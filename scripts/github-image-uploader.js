@@ -444,12 +444,20 @@ function setupImageUploadHandlers() {
             if (file) {
                 console.log('Arquivo:', file.name, file.size, 'bytes');
                 var container = e.target.closest('.internal-image-item');
-                var urlInput = container ? container.querySelector('.internal-image-url') : null;
+                // Busca pelo name em vez de classe
+                var urlInput = container ? container.querySelector('input[name="internalImageUrl[]"]') : null;
+                
+                if (!urlInput) {
+                    // Fallback: busca qualquer input type=url
+                    urlInput = container ? container.querySelector('input[type="url"]') : null;
+                }
                 
                 if (urlInput) {
                     var allContainers = document.querySelectorAll('.internal-image-item');
                     var index = Array.from(allContainers).indexOf(container) + 1;
                     await handleInternalImageUpload(file, urlInput, index);
+                } else {
+                    console.error('Campo de URL não encontrado no container');
                 }
             }
         }

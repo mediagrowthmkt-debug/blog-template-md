@@ -2,6 +2,8 @@
 
 > Central de documentação técnica para replicar o sistema de blog MediaGrowth para novos clientes
 
+**⚡ Atualizado para v4.0 - Upload Imediato de Imagens (01/03/2026)**
+
 ---
 
 ## 📚 GUIAS DISPONÍVEIS
@@ -35,16 +37,18 @@ Documentação técnica completa do sistema:
 
 ---
 
-### 📤 **[UPLOAD-IMAGENS-GUIDE.md](UPLOAD-IMAGENS-GUIDE.md)** ⭐ NOVO!
+### 📤 **[UPLOAD-IMAGENS-GUIDE.md](UPLOAD-IMAGENS-GUIDE.md)** ⭐ v4.0!
 **Tempo:** 15 minutos | **Dificuldade:** ⭐⭐☆☆☆
 
+**ATUALIZADO para v4.0 com UPLOAD IMEDIATO!**
+
 Guia completo do sistema de upload de imagens para GitHub:
-- 🎯 Visão geral e funcionalidades
+- 🚀 **NOVO:** Upload IMEDIATO ao selecionar imagem
+- 📁 **NOVO:** Cada post tem sua própria pasta de imagens
 - ⚙️ Configuração do token do GitHub
-- 🚀 Como usar (capa + imagens internas)
 - 🏗️ Arquitetura técnica (APIs, otimização)
 - 🐛 Troubleshooting completo
-- 💡 Dicas avançadas (batch upload, delete, migrate)
+- 💡 Dicas de personalização
 
 **👉 Essencial para configurar upload de imagens do cliente!**
 
@@ -120,14 +124,13 @@ Fluxogramas visuais do sistema:
 
 ## 📊 ESTATÍSTICAS DA DOCUMENTAÇÃO
 
-| Arquivo | Linhas | Palavras | Seções | Última Atualização |
-|---------|--------|----------|--------|-------------------|
-| GUIA-REPLICACAO-CLIENTE.md | ~616 | ~4,800 | 15 | 27/02/2026 |
-| DOCUMENTACAO-COMPLETA.md | ~1,273 | ~9,500 | 25 | 22/02/2026 |
-| UPLOAD-IMAGENS-GUIDE.md | ~650 | ~5,200 | 18 | 27/02/2026 ⭐ |
-| FAQ-TROUBLESHOOTING.md | ~400 | ~3,000 | 12 | 22/02/2026 |
-| FLUXOGRAMA-SISTEMA.md | ~350 | ~2,200 | 8 | 22/02/2026 |
-| **TOTAL** | **~3,289** | **~24,700** | **78** | - |
+| Arquivo | Linhas | Seções | Última Atualização |
+|---------|--------|--------|-------------------|
+| GUIA-REPLICACAO-CLIENTE.md | ~616 | 15 | 27/02/2026 |
+| DOCUMENTACAO-COMPLETA.md | ~1,273 | 25 | 22/02/2026 |
+| UPLOAD-IMAGENS-GUIDE.md | ~700 | 18 | **01/03/2026 ⭐ v4.0** |
+| FAQ-TROUBLESHOOTING.md | ~400 | 12 | 22/02/2026 |
+| FLUXOGRAMA-SISTEMA.md | ~350 | 8 | 22/02/2026 |
 
 ---
 
@@ -193,9 +196,9 @@ Antes de entregar para cliente, verifique:
 
 ---
 
-**📅 Última atualização:** 27 de fevereiro de 2026  
+**📅 Última atualização:** 01 de março de 2026  
 **👨‍💻 Maintainer:** MediaGrowth Team  
-**📝 Versão:** 2.1
+**📝 Versão:** 4.0 (Upload Imediato)
 
 ---
 
