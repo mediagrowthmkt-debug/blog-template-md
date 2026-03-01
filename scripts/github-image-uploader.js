@@ -220,8 +220,15 @@ async function handleAvatarUpload(file) {
         var credentials = await getGitHubCredentials();
         await ensureImageRepository(credentials.token, credentials.username);
         
+        // Usa o slug do post para organizar as imagens por post
+        var slugInput = document.getElementById('slug');
+        var postSlug = slugInput ? slugInput.value : 'post';
+        postSlug = postSlug.startsWith('/') ? postSlug.substring(1) : postSlug;
+        
+        // Avatar salvo na pasta do post (não mais sobrescreve outros posts)
+        var filePath = 'posts/' + postSlug + '/avatar.jpg';
         var optimizedBlob = await optimizeImage(file, 400, 400, 0.9);
-        var githubUrl = await uploadImageToGitHub(credentials.token, credentials.username, 'avatar.jpg', optimizedBlob);
+        var githubUrl = await uploadImageToGitHub(credentials.token, credentials.username, filePath, optimizedBlob);
         
         window.uploadedImageUrls.avatar = githubUrl;
         
