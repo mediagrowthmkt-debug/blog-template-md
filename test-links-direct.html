@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Direto de Links</title>
+    <link rel="stylesheet" href="assets/css/blog-post.css">
+    <style>
+        body { padding: 40px; }
+        .test-marker {
+            background: red;
+            color: white;
+            padding: 10px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-marker">⬆️ ANTES DA SEÇÃO DE LINKS</div>
+    
+    <!-- TESTE: HTML EXATO QUE DEVERIA SER GERADO -->
+    <section class="useful-links-section" style="margin: 40px 0; padding: 30px; background: rgba(255,255,255,0.03); border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
+        <h3 style="font-size: 1.4rem; color: #EB7A3D; margin: 0 0 20px 0; font-weight: 600;">
+            🔗 Links Úteis
+        </h3>
+        
+        <div class="external-links">
+            <h4 style="font-size: 1.1rem; color: rgba(255,255,255,0.9); margin: 0 0 12px 0; font-weight: 500;">
+                🌐 Recursos Externos
+            </h4>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+                <li style="margin-bottom: 10px;">
+                    <a href="https://www.localfalcon.com" 
+                       target="_blank" 
+                       rel="noopener noreferrer nofollow"
+                       style="color: #4a9eff; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+                        <span>🔗</span>
+                        <span>Local Falcon</span>
+                        <span style="font-size: 0.7em; opacity: 0.7;">↗</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </section>
+    
+    <div class="test-marker">⬇️ DEPOIS DA SEÇÃO DE LINKS</div>
+    
+    <script>
+        console.log('✅ Página carregada');
+        console.log('📍 Seção de links encontrada:', document.querySelector('.useful-links-section'));
+        console.log('🔗 Link encontrado:', document.querySelector('.useful-links-section a'));
+    </script>
+</body>
+</html>

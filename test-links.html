@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Teste Links</title>
+</head>
+<body>
+    <h1>Teste de Links do Bloco 5</h1>
+    <form id="testForm">
+        <input type="url" name="internalLinkUrl[]" value="https://example.com/post1">
+        <input type="text" name="internalLinkAnchor[]" value="Post 1">
+        
+        <input type="url" name="internalLinkUrl[]" value="https://example.com/post2">
+        <input type="text" name="internalLinkAnchor[]" value="Post 2">
+        
+        <input type="url" name="externalLinkUrl[]" value="https://google.com">
+        <input type="text" name="externalLinkAnchor[]" value="Google">
+    </form>
+    
+    <script>
+        const form = document.getElementById('testForm');
+        const formData = new FormData(form);
+        
+        console.log('=== TESTE DE COLETA DE LINKS ===');
+        
+        const internalLinkUrls = formData.getAll('internalLinkUrl[]');
+        const internalLinkAnchors = formData.getAll('internalLinkAnchor[]');
+        
+        console.log('Internal URLs:', internalLinkUrls);
+        console.log('Internal Anchors:', internalLinkAnchors);
+        
+        const externalLinkUrls = formData.getAll('externalLinkUrl[]');
+        const externalLinkAnchors = formData.getAll('externalLinkAnchor[]');
+        
+        console.log('External URLs:', externalLinkUrls);
+        console.log('External Anchors:', externalLinkAnchors);
+        
+        const internalLinks = [];
+        for (let i = 0; i < internalLinkUrls.length; i++) {
+            if (internalLinkUrls[i]) {
+                internalLinks.push({
+                    url: internalLinkUrls[i],
+                    anchor: internalLinkAnchors[i] || ''
+                });
+            }
+        }
+        
+        console.log('Links Internos processados:', internalLinks);
+    </script>
+</body>
+</html>

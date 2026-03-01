@@ -801,6 +801,15 @@ function insertTag(textarea, tag) {
 function showPreview() {
     const formData = collectFormData();
     
+    // Debug COMPLETO dos links
+    console.log('========================================');
+    console.log('🔍 DEBUG PREVIEW - BLOCO 5 LINKS');
+    console.log('========================================');
+    console.log('📦 formData completo:', formData);
+    console.log('🔗 formData.internalLinks:', formData.internalLinks);
+    console.log('🌐 formData.externalLinks:', formData.externalLinks);
+    console.log('========================================');
+    
     // Debug: mostra quantas imagens internas foram coletadas
     console.log('📸 Imagens Internas no Preview:', formData.internalImages);
     console.log('🔗 URLs das imagens:', formData.internalImages?.map(img => img.url) || []);
@@ -817,6 +826,129 @@ function showPreview() {
     previewWindow.document.open();
     previewWindow.document.write(previewHtml);
     previewWindow.document.close();
+}
+
+// ======================
+// GENERATE LINKS SECTION
+// ======================
+function generateLinksSection(data) {
+    console.log('========================================');
+    console.log('🔗 generateLinksSection INICIADA');
+    console.log('========================================');
+    console.log('📦 data recebido:', data);
+    console.log('🔗 data.internalLinks:', data.internalLinks);
+    console.log('🌐 data.externalLinks:', data.externalLinks);
+    
+    const hasInternalLinks = data.internalLinks && data.internalLinks.length > 0 && data.internalLinks.some(link => link.url && link.url.trim());
+    const hasExternalLinks = data.externalLinks && data.externalLinks.length > 0 && data.externalLinks.some(link => link.url && link.url.trim());
+    
+    console.log('✅ Validação:');
+    console.log('   - hasInternalLinks:', hasInternalLinks);
+    console.log('   - hasExternalLinks:', hasExternalLinks);
+    console.log('   - internalLinks length:', data.internalLinks?.length);
+    console.log('   - externalLinks length:', data.externalLinks?.length);
+    console.log('========================================');
+    
+    if (!hasInternalLinks && !hasExternalLinks) {
+        console.log('⚠️ NENHUM LINK VÁLIDO ENCONTRADO - Retornando comentário HTML');
+        return '<!-- ⚠️ LINKS SECTION: EMPTY (no valid links provided) - Check console for details -->'; // Retorna comentário para debug
+    }
+    
+    console.log('✅ GERANDO HTML DE LINKS...');
+    
+    // Detecta idioma
+    const contentText = (data.h1Title || '') + ' ' + (data.contentBody || '');
+    const isEnglish = /\b(the|and|for|with|your|home|how|what|why|best|guide|tips)\b/i.test(contentText);
+    
+    let linksHtml = `
+        <!-- USEFUL LINKS SECTION -->
+        <section class="useful-links-section" style="margin: 40px 0; padding: 30px; background: rgba(255,255,255,0.03); border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
+            <h3 style="font-size: 1.4rem; color: #EB7A3D; margin: 0 0 20px 0; font-weight: 600;">
+                ${isEnglish ? '🔗 Useful Links' : '🔗 Links Úteis'}
+            </h3>
+    `;
+    
+    // Links Internos
+    if (hasInternalLinks) {
+        const validInternalLinks = data.internalLinks.filter(link => link.url && link.url.trim());
+        console.log('📌 Links internos válidos:', validInternalLinks);
+        if (validInternalLinks.length > 0) {
+            linksHtml += `
+            <div class="internal-links" style="margin-bottom: ${hasExternalLinks ? '25px' : '0'};">
+                <h4 style="font-size: 1.1rem; color: rgba(255,255,255,0.9); margin: 0 0 12px 0; font-weight: 500;">
+                    ${isEnglish ? '📌 Related Articles' : '📌 Artigos Relacionados'}
+                </h4>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+            `;
+            
+            validInternalLinks.forEach(link => {
+                const url = link.url.trim();
+                const anchor = link.anchor ? link.anchor.trim() : url;
+                linksHtml += `
+                    <li style="margin-bottom: 10px;">
+                        <a href="${escapeHtml(url)}" 
+                           style="color: #EB7A3D; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease;"
+                           onmouseover="this.style.color='#ff8c52'; this.style.textDecoration='underline';"
+                           onmouseout="this.style.color='#EB7A3D'; this.style.textDecoration='none';">
+                            <span>→</span>
+                            <span>${escapeHtml(anchor)}</span>
+                        </a>
+                    </li>
+                `;
+            });
+            
+            linksHtml += `
+                </ul>
+            </div>
+            `;
+        }
+    }
+    
+    // Links Externos
+    if (hasExternalLinks) {
+        const validExternalLinks = data.externalLinks.filter(link => link.url && link.url.trim());
+        console.log('🌐 Links externos válidos:', validExternalLinks);
+        if (validExternalLinks.length > 0) {
+            linksHtml += `
+            <div class="external-links">
+                <h4 style="font-size: 1.1rem; color: rgba(255,255,255,0.9); margin: 0 0 12px 0; font-weight: 500;">
+                    ${isEnglish ? '🌐 External Resources' : '🌐 Recursos Externos'}
+                </h4>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+            `;
+            
+            validExternalLinks.forEach(link => {
+                const url = link.url.trim();
+                const anchor = link.anchor ? link.anchor.trim() : url;
+                linksHtml += `
+                    <li style="margin-bottom: 10px;">
+                        <a href="${escapeHtml(url)}" 
+                           target="_blank" 
+                           rel="noopener noreferrer nofollow"
+                           style="color: #4a9eff; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease;"
+                           onmouseover="this.style.color='#6bb0ff'; this.style.textDecoration='underline';"
+                           onmouseout="this.style.color='#4a9eff'; this.style.textDecoration='none';">
+                            <span>🔗</span>
+                            <span>${escapeHtml(anchor)}</span>
+                            <span style="font-size: 0.7em; opacity: 0.7;">↗</span>
+                        </a>
+                    </li>
+                `;
+            });
+            
+            linksHtml += `
+                </ul>
+            </div>
+            `;
+        }
+    }
+    
+    linksHtml += `
+        </section>
+    `;
+    
+    console.log('✅ HTML de links gerado, tamanho:', linksHtml.length);
+    return linksHtml;
 }
 
 // ======================
@@ -1361,6 +1493,8 @@ function generateFullPreviewPage(data) {
             ${data.conclusion || '<p>Conclusão do post...</p>'}
         </div>
         
+        ${generateLinksSection(data)}
+        
         ${generateLeadFormHtml(data)}
 
         <!-- TAGS -->
@@ -1448,7 +1582,10 @@ async function handleFormSubmit(e) {
     }
 }
 
-async function savePostToServer(html, slug) {
+async function savePostToServer(originalHtml, slug) {
+    // Cria uma cópia mutável do HTML
+    let html = originalHtml;
+    
     // Verifica se há token GitHub configurado
     const githubToken = localStorage.getItem('github_token');
     
@@ -1457,86 +1594,104 @@ async function savePostToServer(html, slug) {
         console.log('🚀 Token GitHub encontrado! Publicando automaticamente...');
         
         try {
-            // 🖼️ PASSO 1: Enviar IMAGENS primeiro (avatar, capa, internas)
-            console.log('📤 PASSO 1: Enviando imagens para GitHub...');
-            console.log('📦 window.pendingImages:', window.pendingImages);
+            // ============================================================
+            // 🖼️ PASSO 1: EXTRAIR E FAZER UPLOAD DE TODAS AS IMAGENS BASE64
+            // ============================================================
+            console.log('� PASSO 1: Processando imagens Base64 do HTML...');
             
-            if (window.uploadPendingImagesToGitHub) {
-                const uploadedImages = await window.uploadPendingImagesToGitHub(slug);
-                console.log('✅ Imagens enviadas:', uploadedImages);
-                
-                // Substitui URLs Base64 pelas URLs do GitHub no HTML
-                if (uploadedImages) {
-                    // Conta quantas substituições foram feitas
-                    let avatarSubstituted = 0;
-                    let coverSubstituted = 0;
-                    
-                    if (uploadedImages.avatar) {
-                        console.log('🔄 Substituindo avatar Base64 por:', uploadedImages.avatar);
-                        // Substitui QUALQUER data:image que seja JPEG/JPG e esteja na seção de autor
-                        const beforeReplace = html;
-                        
-                        // Estratégia 1: Procura por avatar.jpg específico (se tiver)
-                        html = html.replace(/src="data:image\/[^"]+"/gi, (match) => {
-                            // Verifica se está próximo do nome do autor (contexto)
-                            const index = html.indexOf(match);
-                            const contextBefore = html.substring(Math.max(0, index - 500), index);
-                            const contextAfter = html.substring(index, Math.min(html.length, index + 500));
-                            
-                            // Se encontrar "author" ou "autor" perto, é o avatar
-                            if (/author|autor|avatar/i.test(contextBefore + contextAfter)) {
-                                console.log('  ✅ Avatar Base64 encontrado e substituído');
-                                avatarSubstituted++;
-                                return `src="${uploadedImages.avatar}"`;
-                            }
-                            return match;
-                        });
-                        
-                        console.log(`  📊 ${avatarSubstituted} avatar(s) substituído(s)`);
-                    }
-                    
-                    if (uploadedImages.cover) {
-                        console.log('🔄 Substituindo capa Base64 por:', uploadedImages.cover);
-                        
-                        // Substitui primeiro data:image que não foi substituído ainda (provavelmente é a capa)
-                        html = html.replace(/src="data:image\/[^"]+"/i, (match) => {
-                            // Se não foi o avatar, é a capa
-                            if (!match.includes(uploadedImages.avatar)) {
-                                console.log('  ✅ Capa Base64 encontrada e substituída');
-                                coverSubstituted++;
-                                return `src="${uploadedImages.cover}"`;
-                            }
-                            return match;
-                        });
-                        
-                        console.log(`  📊 ${coverSubstituted} capa(s) substituída(s)`);
-                    }
-                    
-                    // Substitui imagens internas
-                    if (uploadedImages.internals && uploadedImages.internals.length > 0) {
-                        console.log('🔄 Substituindo', uploadedImages.internals.length, 'imagens internas');
-                        
-                        uploadedImages.internals.forEach((url, index) => {
-                            // Substitui próximo data:image encontrado
-                            html = html.replace(/src="data:image\/[^"]+"/i, `src="${url}"`);
-                            console.log(`  ✅ Imagem interna ${index + 1} substituída: ${url.substring(0, 50)}...`);
-                        });
-                    }
-                    
-                    // Verificação final
-                    const remainingBase64 = (html.match(/data:image\/[^"]+/g) || []).length;
-                    if (remainingBase64 > 0) {
-                        console.warn(`⚠️ ATENÇÃO: Ainda existem ${remainingBase64} imagens Base64 no HTML!`);
-                    } else {
-                        console.log('✅ Todas as imagens Base64 foram substituídas por URLs do GitHub');
-                    }
-                }
-            } else {
-                console.warn('⚠️ uploadPendingImagesToGitHub não encontrado!');
+            // Encontra TODAS as imagens Base64 no HTML usando regex global
+            const base64Pattern = /src="(data:image\/[^"]+)"/g;
+            let match;
+            const base64Images = [];
+            
+            while ((match = base64Pattern.exec(html)) !== null) {
+                base64Images.push({
+                    fullMatch: match[0],
+                    base64Data: match[1]
+                });
             }
             
+            console.log(`📊 Total de imagens Base64 encontradas: ${base64Images.length}`);
+            
+            if (base64Images.length > 0) {
+                // Configura credenciais do GitHub
+                const token = githubToken;
+                let username = localStorage.getItem('github_username');
+                
+                if (!username) {
+                    console.log('🔍 Buscando username via API...');
+                    try {
+                        const userResponse = await fetch('https://api.github.com/user', {
+                            headers: { 'Authorization': `token ${token}` }
+                        });
+                        if (userResponse.ok) {
+                            const userData = await userResponse.json();
+                            username = userData.login;
+                            localStorage.setItem('github_username', username);
+                            console.log(`✅ Username detectado: ${username}`);
+                        }
+                    } catch (e) {
+                        console.error('Erro ao buscar username:', e);
+                    }
+                }
+                
+                const repoName = 'blog-images';
+                const cleanSlug = slug.startsWith('/') ? slug.substring(1) : slug;
+                const rawBase = `https://raw.githubusercontent.com/${username}/${repoName}/main`;
+                
+                // Garante que repositório existe
+                await ensureImageRepo(token, username, repoName);
+                
+                // Faz upload de cada imagem Base64
+                for (let i = 0; i < base64Images.length; i++) {
+                    const imgData = base64Images[i];
+                    
+                    console.log(`\n� Processando imagem ${i + 1}/${base64Images.length}...`);
+                    
+                    // Determina o nome do arquivo baseado na posição
+                    let filename;
+                    if (i === 0) {
+                        // Primeira imagem - avatar (baseado na estrutura do HTML gerado)
+                        filename = 'avatar.jpg';
+                    } else if (i === 1) {
+                        // Segunda imagem - capa
+                        filename = `posts/${cleanSlug}/cover.jpg`;
+                    } else {
+                        // Demais são imagens internas
+                        filename = `posts/${cleanSlug}/image-${i}.jpg`;
+                    }
+                    
+                    try {
+                        // Faz upload para GitHub
+                        const imageUrl = await uploadBase64ImageToGitHub(token, username, repoName, filename, imgData.base64Data);
+                        
+                        // Substitui EXATAMENTE essa ocorrência no HTML
+                        html = html.replace(imgData.fullMatch, `src="${imageUrl}"`);
+                        
+                        console.log(`   ✅ Imagem ${i + 1} enviada: ${filename}`);
+                        console.log(`   🔗 URL: ${imageUrl}`);
+                    } catch (uploadError) {
+                        console.error(`   ❌ Erro no upload da imagem ${i + 1}:`, uploadError);
+                    }
+                }
+                
+                // Verifica se todas foram substituídas
+                const remainingBase64 = (html.match(/data:image\/[^"]+/g) || []).length;
+                console.log(`\n📊 Imagens Base64 restantes: ${remainingBase64}`);
+                
+                if (remainingBase64 === 0) {
+                    console.log('✅ Todas as imagens foram enviadas para o GitHub!');
+                } else {
+                    console.warn(`⚠️ ${remainingBase64} imagens não foram processadas`);
+                }
+            } else {
+                console.log('ℹ️ Nenhuma imagem Base64 encontrada no HTML');
+            }
+            
+            // ============================================================
             // 📝 PASSO 2: Enviar POST com URLs das imagens já substituídas
-            console.log('📤 PASSO 2: Enviando post para GitHub /posts/...');
+            // ============================================================
+            console.log('\n📤 PASSO 2: Enviando post para GitHub /posts/...');
             const publisher = window.initGitHubPublisher();
             
             if (publisher) {
@@ -1564,6 +1719,104 @@ async function savePostToServer(html, slug) {
     // ❌ Sem token ou erro - usa download manual
     console.log('📥 Preparando post para download manual...');
     return savePostAsDownload(html, slug);
+}
+
+/**
+ * Garante que o repositório de imagens existe no GitHub
+ */
+async function ensureImageRepo(token, username, repoName) {
+    const apiBase = 'https://api.github.com';
+    
+    try {
+        const response = await fetch(`${apiBase}/repos/${username}/${repoName}`, {
+            headers: { 'Authorization': `token ${token}` }
+        });
+        
+        if (response.ok) {
+            console.log(`✅ Repositório ${repoName} existe`);
+            return true;
+        }
+        
+        if (response.status === 404) {
+            console.log(`📦 Criando repositório ${repoName}...`);
+            const createResponse = await fetch(`${apiBase}/user/repos`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: repoName,
+                    description: 'Armazenamento de imagens do blog',
+                    private: false,
+                    auto_init: true
+                })
+            });
+            
+            if (createResponse.ok) {
+                console.log('✅ Repositório criado!');
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                return true;
+            }
+        }
+    } catch (error) {
+        console.error('Erro ao verificar/criar repositório:', error);
+    }
+    
+    return false;
+}
+
+/**
+ * Faz upload de uma imagem Base64 para o GitHub
+ */
+async function uploadBase64ImageToGitHub(token, username, repoName, filename, base64Data) {
+    const apiBase = 'https://api.github.com';
+    const rawBase = `https://raw.githubusercontent.com/${username}/${repoName}/main`;
+    
+    // Remove o prefixo data:image/xxx;base64, se existir
+    let base64Content = base64Data;
+    if (base64Content.includes(',')) {
+        base64Content = base64Content.split(',')[1];
+    }
+    
+    // Verifica se arquivo já existe (para pegar o SHA)
+    let sha = null;
+    try {
+        const checkResponse = await fetch(`${apiBase}/repos/${username}/${repoName}/contents/${filename}`, {
+            headers: { 'Authorization': `token ${token}` }
+        });
+        
+        if (checkResponse.ok) {
+            const fileData = await checkResponse.json();
+            sha = fileData.sha;
+            console.log(`   ℹ️ Arquivo já existe, atualizando...`);
+        }
+    } catch (e) {
+        // Arquivo não existe, OK
+    }
+    
+    // Faz upload
+    const uploadResponse = await fetch(`${apiBase}/repos/${username}/${repoName}/contents/${filename}`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `token ${token}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            message: `Upload ${filename}`,
+            content: base64Content,
+            branch: 'main',
+            ...(sha && { sha })
+        })
+    });
+    
+    if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json();
+        throw new Error(`Falha no upload: ${errorData.message}`);
+    }
+    
+    // Retorna URL pública da imagem
+    return `${rawBase}/${filename}`;
 }
 
 function savePostAsDownload(html, slug) {
@@ -1648,29 +1901,49 @@ function collectFormData() {
     console.log('📦 Total de imagens internas processadas:', internalImages.length);
     console.log('📸 Array final de imagens:', internalImages);
     
-    const internalLinks = [];
-    const internalLinkUrls = formData.getAll('internalLinkUrl[]');
-    const internalLinkAnchors = formData.getAll('internalLinkAnchor[]');
-    for (let i = 0; i < internalLinkUrls.length; i++) {
-        if (internalLinkUrls[i]) {
-            internalLinks.push({
-                url: internalLinkUrls[i],
-                anchor: internalLinkAnchors[i] || ''
-            });
-        }
-    }
+    // ============================================================
+    // COLETA DE LINKS - MÉTODO ROBUSTO COM querySelectorAll
+    // ============================================================
     
-    const externalLinks = [];
-    const externalLinkUrls = formData.getAll('externalLinkUrl[]');
-    const externalLinkAnchors = formData.getAll('externalLinkAnchor[]');
-    for (let i = 0; i < externalLinkUrls.length; i++) {
-        if (externalLinkUrls[i]) {
-            externalLinks.push({
-                url: externalLinkUrls[i],
-                anchor: externalLinkAnchors[i] || ''
-            });
+    // Links Internos
+    const internalLinks = [];
+    const internalLinkItems = document.querySelectorAll('#internalLinksContainer .link-item');
+    console.log('🔗 DEBUG - Itens de links internos encontrados:', internalLinkItems.length);
+    
+    internalLinkItems.forEach((item, index) => {
+        const urlInput = item.querySelector('input[name="internalLinkUrl[]"]');
+        const anchorInput = item.querySelector('input[name="internalLinkAnchor[]"]');
+        const url = urlInput ? urlInput.value.trim() : '';
+        const anchor = anchorInput ? anchorInput.value.trim() : '';
+        
+        console.log(`   Link Interno ${index + 1}: URL="${url}" Anchor="${anchor}"`);
+        
+        if (url) {
+            internalLinks.push({ url: url, anchor: anchor || url });
         }
-    }
+    });
+    
+    // Links Externos
+    const externalLinks = [];
+    const externalLinkItems = document.querySelectorAll('#externalLinksContainer .link-item');
+    console.log('🌐 DEBUG - Itens de links externos encontrados:', externalLinkItems.length);
+    
+    externalLinkItems.forEach((item, index) => {
+        const urlInput = item.querySelector('input[name="externalLinkUrl[]"]');
+        const anchorInput = item.querySelector('input[name="externalLinkAnchor[]"]');
+        const url = urlInput ? urlInput.value.trim() : '';
+        const anchor = anchorInput ? anchorInput.value.trim() : '';
+        
+        console.log(`   Link Externo ${index + 1}: URL="${url}" Anchor="${anchor}"`);
+        
+        if (url) {
+            externalLinks.push({ url: url, anchor: anchor || url });
+        }
+    });
+    
+    console.log('✅ Links Internos coletados:', internalLinks);
+    console.log('✅ Links Externos coletados:', externalLinks);
+    console.log('========================================');
     
     // Tags
     const tagsString = formData.get('tags');
@@ -2332,6 +2605,8 @@ async function generatePostHtml(data) {
         <div class="post-conclusion">
             ${sanitizeHtmlContent(data.conclusion) || '<p>Conclusão do post...</p>'}
         </div>
+        
+        ${generateLinksSection(data)}
         
         ${leadFormHtml}
 

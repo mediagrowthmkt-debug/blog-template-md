@@ -1,718 +1,478 @@
 /**
- * GitHub Image Uploader v3.0
- * Sistema de upload de imagens LOCAL com publicação no GitHub
- * 
- * FLUXO CORRETO:
- * 1. Usuário seleciona imagem → Converte para Base64 (LOCAL)
- * 2. Base64 é usado no preview local
- * 3. Ao clicar "Publicar" → Faz upload para GitHub e substitui URLs
- * 
- * @version 3.0
- * @date 2026-02-27
+ * GitHub Image Uploader v4.0
+ * Upload IMEDIATO de imagens para GitHub
+ * @version 4.0
+ * @date 2026-03-01
  */
 
-// ======================
-// ARMAZENAMENTO LOCAL
-// ======================
+var IMAGE_REPO_NAME = 'blog-images';
+var API_BASE = 'https://api.github.com';
+var RAW_BASE = 'https://raw.githubusercontent.com';
 
-// Cache de imagens aguardando publicação
-window.pendingImages = {
-    avatar: null,      // { file, base64, filename }
-    cover: null,       // { file, base64, filename, postSlug }
-    internals: []      // [{ file, base64, filename, postSlug, index }]
+window.uploadedImageUrls = {
+    avatar: null,
+    cover: null,
+    internals: []
 };
 
-// ======================
-// CONVERSÃO PARA BASE64
-// ======================
+async function getGitHubCredentials() {
+    var token = localStorage.getItem('github_token');
+    var username = localStorage.getItem('github_username');
+    
+    if (!token) {
+        throw new Error('Token GitHub nao configurado.');
+    }
+    
+    if (!username) {
+        console.log('Buscando username via API...');
+        var response = await fetch(API_BASE + '/user', {
+            headers: { 'Authorization': 'token ' + token }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Token GitHub invalido.');
+        }
+        
+        var userData = await response.json();
+        username = userData.login;
+        localStorage.setItem('github_username', username);
+        console.log('Username detectado: ' + username);
+    }
+    
+    return { token: token, username: username };
+}
 
-/**
- * Otimiza e converte imagem para Base64
- * @param {File} file - Arquivo original
- * @returns {Promise<{blob: Blob, base64: string}>}
- */
-async function optimizeAndConvert(file) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        const reader = new FileReader();
+async function ensureImageRepository(token, username) {
+    console.log('Verificando repositorio ' + IMAGE_REPO_NAME);
+    
+    var checkResponse = await fetch(API_BASE + '/repos/' + username + '/' + IMAGE_REPO_NAME, {
+        headers: { 'Authorization': 'token ' + token }
+    });
+    
+    if (checkResponse.ok) {
+        console.log('Repositorio existe');
+        return true;
+    }
+    
+    if (checkResponse.status === 404) {
+        console.log('Criando repositorio ' + IMAGE_REPO_NAME);
+        
+        var createResponse = await fetch(API_BASE + '/user/repos', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'token ' + token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: IMAGE_REPO_NAME,
+                description: 'Imagens do blog',
+                private: false,
+                auto_init: true
+            })
+        });
+        
+        if (!createResponse.ok) {
+            var error = await createResponse.json();
+            throw new Error('Falha ao criar repositorio: ' + error.message);
+        }
+        
+        console.log('Repositorio criado!');
+        await new Promise(function(resolve) { setTimeout(resolve, 3000); });
+        return true;
+    }
+    
+    throw new Error('Erro ao verificar repositorio');
+}
 
-        reader.onload = (e) => {
+async function optimizeImage(file, maxWidth, maxHeight, quality) {
+    maxWidth = maxWidth || 1920;
+    maxHeight = maxHeight || 1080;
+    quality = quality || 0.85;
+    
+    return new Promise(function(resolve, reject) {
+        var img = new Image();
+        var reader = new FileReader();
+        
+        reader.onload = function(e) {
             img.src = e.target.result;
         };
-
-        img.onload = () => {
-            const MAX_WIDTH = 1920;
-            const MAX_HEIGHT = 1080;
-            const QUALITY = 0.85;
-
-            let width = img.width;
-            let height = img.height;
-
-            if (width > MAX_WIDTH || height > MAX_HEIGHT) {
-                const ratio = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height);
+        
+        img.onload = function() {
+            var width = img.width;
+            var height = img.height;
+            
+            if (width > maxWidth || height > maxHeight) {
+                var ratio = Math.min(maxWidth / width, maxHeight / height);
                 width = Math.floor(width * ratio);
                 height = Math.floor(height * ratio);
             }
-
-            const canvas = document.createElement('canvas');
+            
+            var canvas = document.createElement('canvas');
             canvas.width = width;
             canvas.height = height;
-
-            const ctx = canvas.getContext('2d');
+            
+            var ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, width, height);
-
-            canvas.toBlob(
-                (blob) => {
-                    if (blob) {
-                        // Converte blob para base64
-                        const blobReader = new FileReader();
-                        blobReader.onloadend = () => {
-                            resolve({
-                                blob: blob,
-                                base64: blobReader.result // data:image/jpeg;base64,/9j/4AAQ...
-                            });
-                        };
-                        blobReader.onerror = reject;
-                        blobReader.readAsDataURL(blob);
-                    } else {
-                        reject(new Error('Falha ao otimizar imagem'));
-                    }
-                },
-                'image/jpeg',
-                QUALITY
-            );
+            
+            canvas.toBlob(function(blob) {
+                if (blob) {
+                    resolve(blob);
+                } else {
+                    reject(new Error('Falha ao otimizar'));
+                }
+            }, 'image/jpeg', quality);
         };
-
-        img.onerror = reject;
-        reader.onerror = reject;
+        
+        img.onerror = function() { reject(new Error('Falha ao carregar')); };
+        reader.onerror = function() { reject(new Error('Falha ao ler')); };
         reader.readAsDataURL(file);
     });
 }
 
-// ======================
-// HANDLERS DE UPLOAD LOCAL
-// ======================
+async function blobToBase64(blob) {
+    return new Promise(function(resolve, reject) {
+        var reader = new FileReader();
+        reader.onloadend = function() {
+            var base64 = reader.result.split(',')[1];
+            resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
+}
 
-/**
- * Handler para upload de avatar (LOCAL - Base64)
- * NÃO FAZ UPLOAD PARA GITHUB - APENAS CONVERTE PARA BASE64
- */
+async function uploadImageToGitHub(token, username, filePath, blob) {
+    console.log('Enviando: ' + filePath);
+    
+    var base64Content = await blobToBase64(blob);
+    var sha = null;
+    
+    try {
+        var checkResponse = await fetch(
+            API_BASE + '/repos/' + username + '/' + IMAGE_REPO_NAME + '/contents/' + filePath,
+            { headers: { 'Authorization': 'token ' + token } }
+        );
+        
+        if (checkResponse.ok) {
+            var data = await checkResponse.json();
+            sha = data.sha;
+            console.log('Arquivo existe, atualizando...');
+        }
+    } catch (e) {}
+    
+    var requestBody = {
+        message: 'Upload: ' + filePath,
+        content: base64Content,
+        branch: 'main'
+    };
+    if (sha) requestBody.sha = sha;
+    
+    var uploadResponse = await fetch(
+        API_BASE + '/repos/' + username + '/' + IMAGE_REPO_NAME + '/contents/' + filePath,
+        {
+            method: 'PUT',
+            headers: {
+                'Authorization': 'token ' + token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+        }
+    );
+    
+    if (!uploadResponse.ok) {
+        var error = await uploadResponse.json();
+        throw new Error('Falha no upload: ' + error.message);
+    }
+    
+    var publicUrl = RAW_BASE + '/' + username + '/' + IMAGE_REPO_NAME + '/main/' + filePath;
+    console.log('Enviado: ' + publicUrl);
+    return publicUrl;
+}
+
 async function handleAvatarUpload(file) {
-    console.log('🖼️ Avatar: Processamento LOCAL iniciado (SEM GitHub)');
+    console.log('Avatar: Upload para GitHub...');
     
-    const avatarInput = document.getElementById('authorAvatar');
-    const statusElement = document.getElementById('avatarUploadStatus');
-
+    var avatarInput = document.getElementById('authorAvatar');
+    var statusElement = document.getElementById('avatarUploadStatus');
+    var previewElement = document.getElementById('avatarPreview');
+    
     try {
-        // Validação
         if (!file.type.startsWith('image/')) {
-            throw new Error('Selecione um arquivo de imagem válido');
+            throw new Error('Selecione uma imagem valida');
         }
-
-        const MAX_SIZE = 10 * 1024 * 1024;
-        if (file.size > MAX_SIZE) {
-            throw new Error('Imagem muito grande. Máximo: 10MB');
+        
+        if (file.size > 10 * 1024 * 1024) {
+            throw new Error('Imagem muito grande. Max: 10MB');
         }
-
-        // Feedback
+        
         if (statusElement) {
-            statusElement.textContent = '📦 Processando localmente...';
+            statusElement.textContent = 'Enviando para GitHub...';
+            statusElement.style.color = '#f59e0b';
             statusElement.classList.add('show');
-            statusElement.classList.remove('upload-success', 'upload-error');
         }
-
-        // Otimiza e converte
-        const {blob, base64} = await optimizeAndConvert(file);
-
-        // Salva no cache
-        window.pendingImages.avatar = {
-            file: new File([blob], 'avatar.jpg', { type: 'image/jpeg' }),
-            base64: base64,
-            filename: 'avatar.jpg'
-        };
-
-        // Preenche campo com Base64
+        
+        var localPreview = URL.createObjectURL(file);
+        if (previewElement) {
+            previewElement.src = localPreview;
+            previewElement.style.display = 'block';
+        }
+        
+        var credentials = await getGitHubCredentials();
+        await ensureImageRepository(credentials.token, credentials.username);
+        
+        var optimizedBlob = await optimizeImage(file, 400, 400, 0.9);
+        var githubUrl = await uploadImageToGitHub(credentials.token, credentials.username, 'avatar.jpg', optimizedBlob);
+        
+        window.uploadedImageUrls.avatar = githubUrl;
+        
         if (avatarInput) {
-            avatarInput.value = base64;
+            avatarInput.value = githubUrl;
         }
-
-        // Mostra preview da imagem
-        const previewElement = document.getElementById('avatarPreview');
+        
         if (previewElement) {
-            previewElement.src = base64;
-            previewElement.style.display = 'block';
-            previewElement.style.animation = 'fadeIn 0.3s ease-in';
+            previewElement.src = githubUrl + '?t=' + Date.now();
         }
-
-        // Feedback
+        
         if (statusElement) {
-            statusElement.textContent = '✅ Avatar carregado! Será enviado ao publicar';
+            statusElement.textContent = 'Avatar enviado!';
             statusElement.style.color = '#22c55e';
-            statusElement.style.fontWeight = '600';
-            
-            setTimeout(() => {
-                statusElement.style.opacity = '0';
-            }, 3000);
         }
-
-        console.log('✅ Avatar preparado (Base64 local)');
         
-        // Atualiza indicador visual
+        console.log('Avatar enviado:', githubUrl);
         updateImagesLoadedIndicator();
-
+        
     } catch (error) {
-        console.error('❌ Erro ao processar avatar:', error);
-        
+        console.error('Erro ao enviar avatar:', error);
         if (statusElement) {
-            statusElement.textContent = `❌ Erro: ${error.message}`;
-            statusElement.classList.add('upload-error');
-            statusElement.classList.add('show');
+            statusElement.textContent = 'Erro: ' + error.message;
+            statusElement.style.color = '#ef4444';
         }
-        
-        // Atualiza indicador mesmo com erro
-        updateImagesLoadedIndicator();
     }
 }
 
-/**
- * Handler para upload de capa (LOCAL - Base64)
- * NÃO FAZ UPLOAD PARA GITHUB - APENAS CONVERTE PARA BASE64
- */
 async function handleCoverUpload(file) {
-    console.log('🖼️ Capa: Processamento LOCAL iniciado (SEM GitHub)');
+    console.log('Capa: Upload para GitHub...');
     
-    const coverInput = document.getElementById('coverImage');
-    const statusElement = document.getElementById('coverUploadStatus');
-
+    var coverInput = document.getElementById('coverImage');
+    var statusElement = document.getElementById('coverUploadStatus');
+    var previewElement = document.getElementById('coverPreview');
+    
     try {
         if (!file.type.startsWith('image/')) {
-            throw new Error('Selecione um arquivo de imagem válido');
+            throw new Error('Selecione uma imagem valida');
         }
-
-        const MAX_SIZE = 10 * 1024 * 1024;
-        if (file.size > MAX_SIZE) {
-            throw new Error('Imagem muito grande. Máximo: 10MB');
+        
+        if (file.size > 10 * 1024 * 1024) {
+            throw new Error('Imagem muito grande. Max: 10MB');
         }
-
+        
         if (statusElement) {
-            statusElement.textContent = '📦 Processando localmente...';
+            statusElement.textContent = 'Enviando para GitHub...';
+            statusElement.style.color = '#f59e0b';
             statusElement.classList.add('show');
-            statusElement.classList.remove('upload-success', 'upload-error');
         }
-
-        const {blob, base64} = await optimizeAndConvert(file);
-
-        // Busca slug do post
-        const slugInput = document.getElementById('slug');
-        const postSlug = slugInput ? slugInput.value : 'post';
-
-        window.pendingImages.cover = {
-            file: new File([blob], 'cover.jpg', { type: 'image/jpeg' }),
-            base64: base64,
-            filename: 'cover.jpg',
-            postSlug: postSlug
-        };
-
-        if (coverInput) {
-            coverInput.value = base64;
-        }
-
-        // Mostra preview da imagem
-        const previewElement = document.getElementById('coverPreview');
+        
+        var localPreview = URL.createObjectURL(file);
         if (previewElement) {
-            previewElement.src = base64;
+            previewElement.src = localPreview;
             previewElement.style.display = 'block';
-            previewElement.style.animation = 'fadeIn 0.3s ease-in';
         }
-
+        
+        var credentials = await getGitHubCredentials();
+        await ensureImageRepository(credentials.token, credentials.username);
+        
+        var slugInput = document.getElementById('slug');
+        var postSlug = slugInput ? slugInput.value : 'post';
+        postSlug = postSlug.startsWith('/') ? postSlug.substring(1) : postSlug;
+        
+        var filePath = 'posts/' + postSlug + '/cover.jpg';
+        var optimizedBlob = await optimizeImage(file, 1200, 630, 0.85);
+        var githubUrl = await uploadImageToGitHub(credentials.token, credentials.username, filePath, optimizedBlob);
+        
+        window.uploadedImageUrls.cover = githubUrl;
+        
+        if (coverInput) {
+            coverInput.value = githubUrl;
+        }
+        
+        if (previewElement) {
+            previewElement.src = githubUrl + '?t=' + Date.now();
+        }
+        
         if (statusElement) {
-            statusElement.textContent = '✅ Capa carregada! Será enviada ao publicar';
+            statusElement.textContent = 'Capa enviada!';
             statusElement.style.color = '#22c55e';
-            statusElement.style.fontWeight = '600';
-            
-            setTimeout(() => {
-                statusElement.style.opacity = '0';
-            }, 3000);
         }
-
-        console.log('✅ Capa preparada (Base64 local)');
         
-        // Atualiza indicador visual
+        console.log('Capa enviada:', githubUrl);
         updateImagesLoadedIndicator();
-
+        
     } catch (error) {
-        console.error('❌ Erro ao processar capa:', error);
+        console.error('Erro ao enviar capa:', error);
+        if (statusElement) {
+            statusElement.textContent = 'Erro: ' + error.message;
+            statusElement.style.color = '#ef4444';
+        }
+    }
+}
+
+async function handleInternalImageUpload(file, targetInput, index) {
+    console.log('Imagem interna ' + index + ': Upload para GitHub...');
+    
+    var container = targetInput.closest('.internal-image-item');
+    var statusElement = container ? container.querySelector('.upload-status') : null;
+    
+    if (!statusElement && container) {
+        statusElement = document.createElement('small');
+        statusElement.className = 'upload-status';
+        container.appendChild(statusElement);
+    }
+    
+    try {
+        if (!file.type.startsWith('image/')) {
+            throw new Error('Selecione uma imagem valida');
+        }
+        
+        if (file.size > 10 * 1024 * 1024) {
+            throw new Error('Imagem muito grande. Max: 10MB');
+        }
         
         if (statusElement) {
-            statusElement.textContent = `❌ Erro: ${error.message}`;
-            statusElement.classList.add('upload-error');
+            statusElement.textContent = 'Enviando...';
+            statusElement.style.color = '#f59e0b';
             statusElement.classList.add('show');
         }
         
-        // Atualiza indicador mesmo com erro
-        updateImagesLoadedIndicator();
-    }
-}
-
-/**
- * Handler para upload de imagens internas (LOCAL - Base64)
- * NÃO FAZ UPLOAD PARA GITHUB - APENAS CONVERTE PARA BASE64
- */
-async function handleInternalImageUpload(file, targetInput, index) {
-    console.log(`🖼️ Imagem interna ${index}: Processamento LOCAL iniciado (SEM GitHub)`);
-    
-    const container = targetInput.closest('.internal-image-item');
-    let statusElement = container?.querySelector('.upload-status');
-    
-    // Cria elemento de status se não existir
-    if (!statusElement) {
-        statusElement = document.createElement('small');
-        statusElement.className = 'upload-status upload-progress';
-        container?.appendChild(statusElement);
-    }
-
-    try {
-        if (!file.type.startsWith('image/')) {
-            throw new Error('Selecione um arquivo de imagem válido');
-        }
-
-        const MAX_SIZE = 10 * 1024 * 1024;
-        if (file.size > MAX_SIZE) {
-            throw new Error('Imagem muito grande. Máximo: 10MB');
-        }
-
-        statusElement.textContent = '📦 Processando localmente...';
-        statusElement.classList.add('show');
-        statusElement.classList.remove('upload-success', 'upload-error');
-
-        const {blob, base64} = await optimizeAndConvert(file);
-
-        const slugInput = document.getElementById('slug');
-        const postSlug = slugInput ? slugInput.value : 'post';
-
-        // Remove imagem antiga desse índice
-        window.pendingImages.internals = window.pendingImages.internals.filter(img => img.index !== index);
-
-        // Adiciona nova
-        window.pendingImages.internals.push({
-            file: new File([blob], `internal-${index}.jpg`, { type: 'image/jpeg' }),
-            base64: base64,
-            filename: `internal-${index}.jpg`,
-            postSlug: postSlug,
-            index: index
-        });
-
-        targetInput.value = base64;
-
-        statusElement.textContent = '✅ Pronta!';
-        statusElement.classList.add('upload-success');
+        var credentials = await getGitHubCredentials();
+        await ensureImageRepository(credentials.token, credentials.username);
         
-        setTimeout(() => {
-            statusElement.classList.remove('show');
-        }, 3000);
-
-        console.log(`✅ Imagem interna ${index} preparada (Base64 local)`);
+        var slugInput = document.getElementById('slug');
+        var postSlug = slugInput ? slugInput.value : 'post';
+        postSlug = postSlug.startsWith('/') ? postSlug.substring(1) : postSlug;
         
-        // Atualiza indicador visual
+        var filePath = 'posts/' + postSlug + '/image-' + index + '.jpg';
+        var optimizedBlob = await optimizeImage(file, 1920, 1080, 0.85);
+        var githubUrl = await uploadImageToGitHub(credentials.token, credentials.username, filePath, optimizedBlob);
+        
+        while (window.uploadedImageUrls.internals.length < index) {
+            window.uploadedImageUrls.internals.push(null);
+        }
+        window.uploadedImageUrls.internals[index - 1] = githubUrl;
+        
+        if (targetInput) {
+            targetInput.value = githubUrl;
+        }
+        
+        if (statusElement) {
+            statusElement.textContent = 'Enviada!';
+            statusElement.style.color = '#22c55e';
+        }
+        
+        console.log('Imagem interna ' + index + ' enviada:', githubUrl);
         updateImagesLoadedIndicator();
-
+        
     } catch (error) {
-        console.error(`❌ Erro ao processar imagem interna ${index}:`, error);
-        
-        statusElement.textContent = `❌ ${error.message}`;
-        statusElement.classList.add('upload-error');
-        statusElement.classList.add('show');
-        
-        // Atualiza indicador mesmo com erro
-        updateImagesLoadedIndicator();
+        console.error('Erro ao enviar imagem interna ' + index + ':', error);
+        if (statusElement) {
+            statusElement.textContent = 'Erro: ' + error.message;
+            statusElement.style.color = '#ef4444';
+        }
     }
 }
 
-// ======================
-// CONFIGURAÇÃO DE HANDLERS
-// ======================
-
-/**
- * Atualiza o indicador visual de imagens carregadas
- */
 function updateImagesLoadedIndicator() {
-    const indicator = document.getElementById('imagesLoadedIndicator');
-    const countElement = document.getElementById('imagesLoadedCount');
+    var indicator = document.getElementById('imagesLoadedIndicator');
+    var countElement = document.getElementById('imagesLoadedCount');
     
     if (!indicator || !countElement) return;
     
-    let count = 0;
-    if (window.pendingImages.avatar) count++;
-    if (window.pendingImages.cover) count++;
-    count += window.pendingImages.internals.length;
+    var count = 0;
+    if (window.uploadedImageUrls.avatar) count++;
+    if (window.uploadedImageUrls.cover) count++;
+    count += window.uploadedImageUrls.internals.filter(function(url) { return url; }).length;
     
     if (count > 0) {
         countElement.textContent = count;
         indicator.style.display = 'block';
-        indicator.style.animation = 'slideInFromTop 0.4s ease-out';
     } else {
         indicator.style.display = 'none';
     }
     
-    console.log(`📊 Indicador atualizado: ${count} imagem(ns) carregada(s)`);
+    console.log('Imagens no GitHub: ' + count);
 }
 
 function setupImageUploadHandlers() {
-    console.log('🔧 Configurando handlers de upload LOCAL (Base64)...');
-    console.log('🔍 Estado do DOM:', {
-        avatarInput: !!document.getElementById('avatarUploadInput'),
-        coverInput: !!document.getElementById('coverUploadInput'),
-        internalUploads: document.querySelectorAll('.internal-image-upload').length
-    });
-
-    // Handler: Avatar
-    const avatarUploadInput = document.getElementById('avatarUploadInput');
+    console.log('Configurando handlers de upload IMEDIATO para GitHub...');
+    
+    var avatarUploadInput = document.getElementById('avatarUploadInput');
     if (avatarUploadInput) {
-        avatarUploadInput.addEventListener('change', async (e) => {
-            console.log('🖼️ Avatar upload iniciado!');
-            const file = e.target.files[0];
+        avatarUploadInput.addEventListener('change', async function(e) {
+            console.log('Avatar upload iniciado!');
+            var file = e.target.files[0];
             if (file) {
-                console.log('📦 Arquivo selecionado:', file.name, file.size, 'bytes');
+                console.log('Arquivo:', file.name, file.size, 'bytes');
                 await handleAvatarUpload(file);
             }
         });
-        console.log('✅ Handler de avatar configurado (ID: avatarUploadInput)');
-    } else {
-        console.warn('⚠️ Elemento avatarUploadInput não encontrado!');
+        console.log('Handler de avatar configurado');
     }
-
-    // Handler: Capa
-    const coverUploadInput = document.getElementById('coverUploadInput');
+    
+    var coverUploadInput = document.getElementById('coverUploadInput');
     if (coverUploadInput) {
-        coverUploadInput.addEventListener('change', async (e) => {
-            console.log('🖼️ Capa upload iniciada!');
-            const file = e.target.files[0];
+        coverUploadInput.addEventListener('change', async function(e) {
+            console.log('Capa upload iniciada!');
+            var file = e.target.files[0];
             if (file) {
-                console.log('📦 Arquivo selecionado:', file.name, file.size, 'bytes');
+                console.log('Arquivo:', file.name, file.size, 'bytes');
                 await handleCoverUpload(file);
             }
         });
-        console.log('✅ Handler de capa configurado (ID: coverUploadInput)');
-    } else {
-        console.warn('⚠️ Elemento coverUploadInput não encontrado!');
+        console.log('Handler de capa configurado');
     }
-
-    // Handler: Imagens Internas (event delegation)
-    document.addEventListener('change', async (e) => {
+    
+    document.addEventListener('change', async function(e) {
         if (e.target.classList.contains('internal-image-upload')) {
-            console.log('🖼️ Imagem interna upload iniciada!');
-            const file = e.target.files[0];
+            console.log('Imagem interna upload iniciada!');
+            var file = e.target.files[0];
             if (file) {
-                console.log('📦 Arquivo selecionado:', file.name, file.size, 'bytes');
-                const container = e.target.closest('.internal-image-item');
-                const urlInput = container?.querySelector('.internal-image-url');
+                console.log('Arquivo:', file.name, file.size, 'bytes');
+                var container = e.target.closest('.internal-image-item');
+                var urlInput = container ? container.querySelector('.internal-image-url') : null;
                 
                 if (urlInput) {
-                    const allContainers = document.querySelectorAll('.internal-image-item');
-                    const index = Array.from(allContainers).indexOf(container) + 1;
-                    
+                    var allContainers = document.querySelectorAll('.internal-image-item');
+                    var index = Array.from(allContainers).indexOf(container) + 1;
                     await handleInternalImageUpload(file, urlInput, index);
-                } else {
-                    console.error('❌ Input de URL não encontrado!');
                 }
             }
         }
     });
-    console.log('✅ Handler de imagens internas configurado (class: internal-image-upload)');
-    console.log('');
+    console.log('Handler de imagens internas configurado');
 }
 
-// ======================
-// PUBLICAÇÃO NO GITHUB
-// ======================
-
-/**
- * Faz upload de todas as imagens pendentes para o GitHub
- * CHAMADO PELO github-api.js ao publicar post
- * 
- * @returns {Promise<Object>} URLs das imagens no GitHub
- */
-async function uploadPendingImagesToGitHub(postSlug) {
-    const token = localStorage.getItem('github_token');
-    let username = localStorage.getItem('github_username');
-    
-    // Se não tem username, tenta buscar automaticamente via API
-    if (!username && token) {
-        console.log('🔍 Username não configurado, buscando via GitHub API...');
-        try {
-            const response = await fetch('https://api.github.com/user', {
-                headers: { 'Authorization': `token ${token}` }
-            });
-            if (response.ok) {
-                const userData = await response.json();
-                username = userData.login;
-                localStorage.setItem('github_username', username);
-                console.log(`✅ Username detectado e salvo: ${username}`);
-            }
-        } catch (error) {
-            console.error('❌ Erro ao buscar username:', error);
-        }
-    }
-    
-    if (!token || !username) {
-        console.warn('⚠️ Token ou username não configurado. Imagens permanecerão em Base64.');
-        return {
-            avatar: window.pendingImages.avatar?.base64 || null,
-            cover: window.pendingImages.cover?.base64 || null,
-            internals: window.pendingImages.internals.map(img => img.base64)
-        };
-    }
-
-    const repoName = 'blog-images';
-    const apiBase = 'https://api.github.com';
-    const rawBase = 'https://raw.githubusercontent.com';
-    const results = {
-        avatar: null,
-        cover: null,
-        internals: []
+function getUploadedImageUrls() {
+    return {
+        avatar: window.uploadedImageUrls.avatar,
+        cover: window.uploadedImageUrls.cover,
+        internals: window.uploadedImageUrls.internals.filter(function(url) { return url; })
     };
-
-    try {
-        console.log('📤 Iniciando upload de imagens para GitHub...');
-        console.log('📝 Post slug:', postSlug);
-        console.log('🔍 Debug - Estado de pendingImages:', {
-            avatar: window.pendingImages.avatar ? '✅ Presente' : '❌ Não existe',
-            cover: window.pendingImages.cover ? '✅ Presente' : '❌ Não existe',
-            internals: window.pendingImages.internals ? `${window.pendingImages.internals.length} imagens` : '❌ Array vazio'
-        });
-        
-        console.log('🔑 Verificando credenciais...');
-        console.log('   Token:', token ? '✅ Presente' : '❌ Ausente');
-        console.log('   Username:', username);
-        console.log('   Repositório:', repoName);
-        
-        // Garante que repositório existe
-        console.log('📦 Verificando/criando repositório...');
-        await ensureGitHubRepository(token, username, repoName, apiBase);
-
-        // Remove barra inicial do slug se existir (evita posts//arquivo)
-        const cleanSlug = postSlug.startsWith('/') ? postSlug.substring(1) : postSlug;
-
-        // Upload Avatar
-        if (window.pendingImages.avatar) {
-            console.log('📤 Enviando avatar...');
-            await uploadFileToGitHub(
-                token, username, repoName, apiBase,
-                'avatar.jpg',
-                window.pendingImages.avatar.file
-            );
-            results.avatar = `${rawBase}/${username}/${repoName}/main/avatar.jpg`;
-            console.log('✅ Avatar enviado:', results.avatar);
-        }
-
-        // Upload Capa
-        if (window.pendingImages.cover) {
-            console.log('📤 Enviando capa...');
-            await uploadFileToGitHub(
-                token, username, repoName, apiBase,
-                `posts/${cleanSlug}/cover.jpg`,
-                window.pendingImages.cover.file
-            );
-            results.cover = `${rawBase}/${username}/${repoName}/main/posts/${cleanSlug}/cover.jpg`;
-            console.log('✅ Capa enviada:', results.cover);
-        }
-
-        // Upload Imagens Internas
-        if (window.pendingImages.internals && window.pendingImages.internals.length > 0) {
-            console.log(`📤 Enviando ${window.pendingImages.internals.length} imagens internas...`);
-            for (let i = 0; i < window.pendingImages.internals.length; i++) {
-                const img = window.pendingImages.internals[i];
-                await uploadFileToGitHub(
-                    token, username, repoName, apiBase,
-                    `posts/${cleanSlug}/internal-${i + 1}.jpg`,
-                    img.file
-                );
-                const url = `${rawBase}/${username}/${repoName}/main/posts/${cleanSlug}/internal-${i + 1}.jpg`;
-                results.internals.push(url);
-                console.log(`✅ Imagem interna ${i + 1} enviada:`, url);
-            }
-        }
-
-        console.log('🎉 Todas as imagens enviadas para o GitHub!');
-        console.log('📊 Resumo:', results);
-        
-        // Limpa cache após sucesso
-        window.pendingImages = {
-            avatar: null,
-            cover: null,
-            internals: []
-        };
-        
-        // Atualiza indicador visual (vai esconder o contador)
-        updateImagesLoadedIndicator();
-        
-        return results;
-
-    } catch (error) {
-        console.error('❌ Erro ao enviar imagens para GitHub:', error);
-        // Retorna Base64 como fallback
-        return {
-            avatar: window.pendingImages.avatar?.base64 || null,
-            cover: window.pendingImages.cover?.base64 || null,
-            internals: window.pendingImages.internals.map(img => img.base64)
-        };
-    }
 }
-
-/**
- * Garante que repositório existe no GitHub
- */
-async function ensureGitHubRepository(token, username, repoName, apiBase) {
-    try {
-        console.log(`   🔍 Verificando repositório ${username}/${repoName}...`);
-        const response = await fetch(`${apiBase}/repos/${username}/${repoName}`, {
-            headers: { 'Authorization': `token ${token}` }
-        });
-
-        if (response.ok) {
-            console.log(`   ✅ Repositório ${repoName} existe e está acessível`);
-            return true;
-        }
-
-        if (response.status === 404) {
-            console.log(`   📦 Repositório não encontrado, criando ${repoName}...`);
-            const createResponse = await fetch(`${apiBase}/user/repos`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `token ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    name: repoName,
-                    description: 'Armazenamento de imagens do blog',
-                    private: false,
-                    auto_init: true
-                })
-            });
-
-            if (!createResponse.ok) {
-                const errorData = await createResponse.json();
-                console.error(`   ❌ Falha ao criar repositório:`, errorData);
-                throw new Error(`Falha ao criar repositório: ${errorData.message}`);
-            }
-
-            console.log('   ✅ Repositório criado com sucesso!');
-            console.log('   ⏳ Aguardando 3 segundos para inicialização...');
-            await new Promise(resolve => setTimeout(resolve, 3000));
-            console.log('   ✅ Repositório pronto para uso!');
-            return true;
-        }
-
-        console.error(`   ❌ Erro inesperado ao verificar repositório (status ${response.status})`);
-        throw new Error(`Erro ao verificar repositório: ${response.status}`);
-
-        throw new Error(`Erro ao verificar repositório: ${response.status}`);
-    } catch (error) {
-        console.error('Erro ao garantir repositório:', error);
-        throw error;
-    }
-}
-
-/**
- * Faz upload de arquivo individual para GitHub
- */
-async function uploadFileToGitHub(token, username, repoName, apiBase, path, file) {
-    console.log(`   📁 Preparando upload: ${path}`);
-    console.log(`   📦 Arquivo:`, {
-        nome: file.name,
-        tamanho: file.size,
-        tipo: file.type
-    });
-    
-    // Converte File para Base64
-    const base64Content = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            const base64 = reader.result.split(',')[1];
-            console.log(`   ✅ Arquivo convertido para Base64 (${base64.length} caracteres)`);
-            resolve(base64);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-
-    // Verifica se arquivo já existe (para pegar SHA)
-    let sha = null;
-    try {
-        console.log(`   🔍 Verificando se ${path} já existe...`);
-        const existingResponse = await fetch(
-            `${apiBase}/repos/${username}/${repoName}/contents/${path}`,
-            { headers: { 'Authorization': `token ${token}` } }
-        );
-        if (existingResponse.ok) {
-            const data = await existingResponse.json();
-            sha = data.sha;
-            console.log(`   ℹ️ Arquivo ${path} já existe (SHA: ${sha.substring(0, 7)}...), atualizando...`);
-        } else {
-            console.log(`   ℹ️ Arquivo ${path} não existe, criando novo...`);
-        }
-    } catch (error) {
-        console.log(`   ℹ️ Arquivo ${path} não existe (primeira vez), criando...`);
-    }
-
-    // Faz upload
-    const uploadUrl = `${apiBase}/repos/${username}/${repoName}/contents/${path}`;
-    console.log(`   📤 Enviando para GitHub: ${uploadUrl}`);
-    
-    const response = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: {
-            'Authorization': `token ${token}`,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            message: sha ? `Update: ${path}` : `Upload: ${path}`,
-            content: base64Content,
-            ...(sha && { sha })
-        })
-    });
-
-    if (!response.ok) {
-        const error = await response.json();
-        console.error(`   ❌ Falha no upload de ${path}:`, error);
-        throw new Error(`Upload failed for ${path}: ${error.message}`);
-    }
-
-    const result = await response.json();
-    console.log(`   ✅ Upload bem-sucedido! URL: ${result.content.download_url}`);
-    return result;
-}
-
-// ======================
-// INICIALIZAÇÃO
-// ======================
 
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        console.log('📄 DOM carregado, configurando handlers...');
-        setupImageUploadHandlers();
-    });
+    document.addEventListener('DOMContentLoaded', setupImageUploadHandlers);
 } else {
-    console.log('📄 DOM já carregado, configurando handlers imediatamente...');
+    console.log('DOM ja carregado, configurando handlers...');
     setupImageUploadHandlers();
 }
 
-// ======================
-// EXPORTAR FUNÇÕES GLOBALMENTE
-// ======================
-
-window.uploadPendingImagesToGitHub = uploadPendingImagesToGitHub;
+window.getUploadedImageUrls = getUploadedImageUrls;
 window.handleAvatarUpload = handleAvatarUpload;
 window.handleCoverUpload = handleCoverUpload;
 window.handleInternalImageUpload = handleInternalImageUpload;
 
-console.log('📤 GitHub Image Uploader v3.1 carregado');
-console.log('   ✅ Upload LOCAL (Base64) - SEM prompt de username');
-console.log('   ✅ Preview funciona instantaneamente');
-console.log('   ✅ Upload GitHub APENAS ao clicar "Publicar"');
-console.log('   ⚠️  Se aparecer prompt, limpe o cache do navegador (Ctrl+Shift+Delete)');
 console.log('');
-console.log('🔍 Para debugar: Abra console e clique nos botões de upload');
-console.log('   - Avatar: Procure por "🖼️ Avatar upload iniciado!"');
-console.log('   - Capa: Procure por "🖼️ Capa upload iniciada!"');
-console.log('   - Interna: Procure por "🖼️ Imagem interna upload iniciada!"');
+console.log('GitHub Image Uploader v4.0 carregado');
+console.log('  Upload IMEDIATO para GitHub ao selecionar imagem');
+console.log('  Preview usa URL do GitHub');
+console.log('  Post publicado ja tem URLs corretas');
+console.log('');

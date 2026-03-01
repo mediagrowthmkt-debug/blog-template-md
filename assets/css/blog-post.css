@@ -820,6 +820,77 @@ body {
 }
 
 /* =====================================================
+   USEFUL LINKS SECTION
+   ===================================================== */
+.useful-links-section {
+    margin: 40px 0 !important;
+    padding: 30px !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-radius: 16px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.useful-links-section h3 {
+    font-size: 1.4rem !important;
+    color: #EB7A3D !important;
+    margin: 0 0 20px 0 !important;
+    font-weight: 600 !important;
+}
+
+.useful-links-section h4 {
+    font-size: 1.1rem !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    margin: 0 0 12px 0 !important;
+    font-weight: 500 !important;
+}
+
+.useful-links-section .internal-links,
+.useful-links-section .external-links {
+    margin-bottom: 25px;
+}
+
+.useful-links-section .external-links {
+    margin-bottom: 0;
+}
+
+.useful-links-section ul {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.useful-links-section li {
+    margin-bottom: 10px !important;
+}
+
+.useful-links-section a {
+    color: #EB7A3D !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    transition: all 0.2s ease !important;
+    font-weight: 500 !important;
+}
+
+.useful-links-section .external-links a {
+    color: #4a9eff !important;
+}
+
+.useful-links-section a:hover {
+    text-decoration: underline !important;
+    transform: translateX(3px);
+}
+
+.useful-links-section .internal-links a:hover {
+    color: #ff8c52 !important;
+}
+
+.useful-links-section .external-links a:hover {
+    color: #6bb0ff !important;
+}
+
+/* =====================================================
    PRINT STYLES
    ===================================================== */
 @media print {
